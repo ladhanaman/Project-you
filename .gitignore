@@ -1,0 +1,21 @@
+# System files
+.DS_Store
+
+# Python / Backend
+__pycache__/
+*.pyc
+venv/
+backend/.env
+.env
+assessment.db
+reports/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.npm

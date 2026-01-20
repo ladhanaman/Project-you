@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThinkBinary Assessment Report - {{ candidate_name }}</title>
+    <style>
+        /* ========================================
+           ThinkBinary Premium Report Styles
+           ======================================== */
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #1f2937;
+            line-height: 1.5;
+            font-size: 11px;
+            /* Matching compact text size */
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .report-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* Section Headers */
+        h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            color: #4b5563;
+        }
+
+        strong {
+            color: #111827;
+        }
+
+        /* Candidate Details */
+        .candidate-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .candidate-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 40px;
+        }
+
+        .candidate-item {
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .candidate-label {
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .candidate-value {
+            color: #111827;
+            font-weight: 400;
+        }
+
+        /* Test Results Overview */
+        .score-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 25px;
+        }
+
+        .score-list li {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        /* Insights Section */
+        .opportunities-title {
+            color: #15803d;
+            /* Green title */
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 6px;
+            margin-top: 15px;
+        }
+
+        .work-towards-title {
+            color: #b91c1c;
+            /* Red/Orange title */
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 6px;
+            margin-top: 15px;
+        }
+
+        ul {
+            list-style: disc;
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 4px;
+            color: #4b5563;
+            /* Lighter text for list items */
+        }
+
+        /* Week Plan - Updated to match screenshot style */
+        .week-title {
+            color: #1d4ed8;
+            /* Blue */
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 6px;
+            margin-top: 20px;
+        }
+
+        .week-plan-item {
+            margin-bottom: 20px;
+        }
+
+        .week-plan-item p {
+            margin-bottom: 4px;
+        }
+
+        /* Project Recommendations */
+        .project-list {
+            counter-reset: project;
+        }
+
+        .project-item {
+            margin-bottom: 12px;
+        }
+
+        /* Role Fit */
+        .role-fit-section li {
+            list-style: disc;
+            margin-bottom: 6px;
+        }
+
+        .mentorship-section {
+            margin-top: 40px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">ThinkBinary</div>
+            <div class="report-subtitle">Personalized Learning and Industry Readiness Report</div>
+        </div>
+
+        <!-- Candidate Details -->
+        <h2>Candidate Details</h2>
+        <div class="candidate-card">
+            <div class="candidate-grid">
+                <div class="candidate-item"><span class="candidate-label">Full Name:</span> {{ candidate_name }}</div>
+                <div class="candidate-item"><span class="candidate-label">Email Address:</span><br>{{ candidate_email }}
+                </div>
+                <div class="candidate-item"><span class="candidate-label">College / University:</span> {{
+                    candidate_college }}</div>
+                <div class="candidate-item"><span class="candidate-label">Course:</span> {{ candidate_course }}</div>
+                <div class="candidate-item"><span class="candidate-label">Year of Study:</span> {{ candidate_year }}
+                </div>
+                <div class="candidate-item"><span class="candidate-label">WhatsApp:</span> {{ candidate_phone }}</div>
+                <div class="candidate-item"><span class="candidate-label">Specialization:</span> {{
+                    candidate_specialization }}</div>
+                <div class="candidate-item"><span class="candidate-label">LinkedIn:</span> {{ candidate_linkedin }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Introduction -->
+        <h2>Introduction</h2>
+        <p>ThinkBinary was founded to help aspiring engineers bridge the academic-industry divide. The next two years
+            (2025-2027) will be transformative for industries like automotive, healthcare, agriculture, and
+            manufacturing due to increasing adoption of IoT, AI, and smart electronics. India alone is expected to see
+            over $1 billion in Industrial IoT investments with job demand in embedded systems growing at 20% annually.
+            This personalized report analyzes your current readiness, identifies key opportunities and missed learning
+            areas, and provides a step-by-step roadmap for growth. The ultimate goal is to help you succeed in your
+            career with confidence and direction.</p>
+
+        <!-- Purpose of the Test -->
+        <h2>Purpose of the Test</h2>
+        <p>This test is designed to:</p>
+        <ul>
+            <li>Help you calibrate your skills against actual industry expectations, allowing you to understand how well
+                your academic knowledge translates into the demands of a real job.</li>
+            <li>Make you aware of where you excel and what needs improvement, giving you a clear view of your strong
+                technical areas and those that require focused attention.</li>
+            <li>Serve as a roadmap for structured growth, so you can prepare for your career journey step-by-step with
+                measurable goals.</li>
+        </ul>
+
+        <!-- About the Test -->
+        <h2>About the Test</h2>
+        <p>The questions were carefully curated by experienced professionals in the embedded and IoT industry, drawing
+            from real-life scenarios and interview-level challenges. The assessment not only evaluates your technical
+            abilities but also gives you a benchmark against industry needs—making it a starting point for targeted
+            learning and future success. This test was formulated with direct input from professionals working in
+            embedded systems and IoT industries. The goal was to simulate a well-rounded evaluation similar to the first
+            screening phase of technical interviews. Questions were crafted to span not only academic fundamentals but
+            also real-world applications and industry workflows, offering a comprehensive assessment of a candidate's
+            readiness for practical engineering roles.</p>
+
+        <p>Each section of the test serves a specific purpose in evaluating key competencies:</p>
+        <ul>
+            <li><strong>Fundamentals:</strong> This section evaluates the depth of your understanding of core
+                electronics concepts such as digital logic, number systems, microcontroller architecture, and basic
+                circuit operations. These are non-negotiable foundations that every embedded and IoT engineer must
+                master to build reliable systems.</li>
+            <li><strong>Applied Knowledge:</strong> In this section, your ability to translate theory into functional
+                code is tested. It covers embedded C programming, sensor interfacing, peripheral communication (UART,
+                SPI, I2C), and logic debugging. Success in this section shows that you're capable of designing and
+                developing embedded products that work in real-life scenarios.</li>
+            <li><strong>Industry Orientation:</strong> This part tests your understanding of the practical ecosystem
+                around embedded development. It includes version control tools, project workflows, documentation
+                standards, and collaboration practices. These skills help you function effectively in professional teams
+                and deliver high-quality, maintainable projects.</li>
+        </ul>
+
+        <!-- Test Results Overview -->
+        <h2>Test Results Overview</h2>
+        <ul class="score-list">
+            <li>• Fundamentals Score: {{ fundamentals_score }}/100</li>
+            <li>• Applied Knowledge Score: {{ applied_score }}/100</li>
+            <li>• Industry Orientation Score: {{ industry_score }}/100</li>
+            <li>• Total Score: {{ total_score }}/300</li>
+        </ul>
+
+        <!-- Section 1: Fundamentals -->
+        <h2>Section 1: Fundamentals</h2>
+        <div class="opportunities-title">Opportunities:</div>
+        <ul>
+            {% for item in fundamentals_insights.opportunities %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+        <div class="work-towards-title">Work Towards Winning More Opportunities:</div>
+        <ul>
+            {% for item in fundamentals_insights.work_towards %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Section 2: Applied Knowledge -->
+        <h2>Section 2: Applied Knowledge</h2>
+        <div class="opportunities-title">Opportunities:</div>
+        <ul>
+            {% for item in applied_insights.opportunities %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+        <div class="work-towards-title">Work Towards Winning More Opportunities:</div>
+        <ul>
+            {% for item in applied_insights.work_towards %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Section 3: Industry Orientation -->
+        <h2>Section 3: Industry Orientation</h2>
+        <div class="opportunities-title">Opportunities:</div>
+        <ul>
+            {% for item in industry_insights.opportunities %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+        <div class="work-towards-title">Work Towards Winning More Opportunities:</div>
+        <ul>
+            {% for item in industry_insights.work_towards %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- 4-Week Learning Plan -->
+        <h2>Personalized 4-Week Learning Plan</h2>
+        {% for week in learning_plan_weeks %}
+        <div class="week-plan-item">
+            <div class="week-title">Week {{ loop.index }}: {{ week.focus_area }}</div>
+            <p><strong>Tasks:</strong> {{ week.tasks }}</p>
+            <p><strong>Goal:</strong> {{ week.expected_outcome }}</p>
+
+            {% if week.deliverables %}
+            <div style="margin-top: 8px;">
+                <strong>Deliverables:</strong>
+                <ul style="margin: 4px 0 8px 20px; padding: 0;">
+                    {% for item in week.deliverables %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if week.validation %}
+            <div style="margin-top: 8px;">
+                <strong>Validation:</strong>
+                <ul style="margin: 4px 0 8px 20px; padding: 0;">
+                    {% for item in week.validation %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+
+        </div>
+        {% endfor %}
+
+        <!-- Project Recommendations -->
+        <h2>Project Recommendations</h2>
+        <ol style="padding-left: 20px;">
+            {% for project in project_recommendations %}
+            {% if project is mapping %}
+            <li style="margin-bottom: 8px;">
+                <strong>{{ project.title }}:</strong> {{ project.description }}
+                {% if project.time_estimate %}
+                <span style="color: #4b5563; font-size: 10px; font-weight: 500;">(⏱️ {{ project.time_estimate }})</span>
+                {% endif %}
+            </li>
+            {% else %}
+            <li style="margin-bottom: 8px;">{{ project }}</li>
+            {% endif %}
+            {% endfor %}
+        </ol>
+
+        <!-- Role Fit -->
+        <h2>Suggested Role Fit</h2>
+        <ul class="role-fit-section">
+            {% if role_fit is iterable and role_fit is not string %}
+            {% for role in role_fit %}
+            <li><strong>{{ role.job_title }}:</strong> {{ role.role_description }}</li>
+            {% endfor %}
+            {% else %}
+            <li>{{ role_fit }}</li>
+            {% endif %}
+        </ul>
+
+        <!-- Mentorship Program -->
+        <h2>ThinkBinary Mentorship & Career Scaling Program</h2>
+        <p>At ThinkBinary, we believe that technical skills are just one part of building a successful career. Our
+            Mentorship & Career Scaling Program is designed to bridge the final gap between knowledge and impactful
+            employment. Through one-on-one guidance, structured project cycles, and access to real-world product design
+            processes, our program ensures you are not only skilled but also industry-ready.</p>
+
+        <p style="margin-top: 15px; margin-bottom: 10px;"><strong>Program Offerings:</strong></p>
+        <ul>
+            <li>Dedicated Mentorship: Pair with industry experts for feedback and growth paths.</li>
+            <li>Hands-On Projects: Work on capstone-level projects reflecting real industry cases.</li>
+            <li>Weekly Knowledge Sessions: Expert talks, Q&A, and case reviews.</li>
+            <li>Career Enablement Track: Resume building, LinkedIn/GitHub support, and mock interviews.</li>
+            <li>Tech and Workflow Tools: Exposure to Jira, GitHub, Asana, Trello, and CI/CD.</li>
+            <li>Community and Alumni Network: Collaborate on projects and research beyond the classroom.</li>
+        </ul>
+
+        <!-- Footer -->
+        <div class="footer">
+            Generated by ThinkBinary Assessment Engine | Professional Career Guidance Report
+        </div>
+    </div>
+</body>
+
+</html>
