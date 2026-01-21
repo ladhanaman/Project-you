@@ -6,10 +6,8 @@ from enum import Enum
 import re
 import bleach
 
-class CategoryEnum(str, Enum):
-    FUNDAMENTALS = "Fundamentals"
-    APPLIED = "Applied Knowledge"
-    INDUSTRY = "Industry Orientation"
+# CategoryEnum removed - PRI system no longer uses categories
+
 
 
 # ============================================================================
@@ -168,7 +166,7 @@ class QuestionResponse(BaseModel):
     option_2: str
     option_3: str
     option_4: str
-    category: CategoryEnum
+    option_5: Optional[str] = None  # ✅ CRITICAL FIX: Added 5th option
     tags: List[str]
 
     class Config:
@@ -187,33 +185,24 @@ class SectionInsight(BaseModel):
 
 class SubmissionResponse(BaseModel):
     id: int
-    candidate_email: str
-    fundamentals_score: int
-    applied_score: int
-    industry_score: int
-    total_score: int
-    executive_summary: Optional[str]
-
-    # Per-section insights
-    fundamentals_insights: Optional[SectionInsight]
-    applied_insights: Optional[SectionInsight]
-    industry_insights: Optional[SectionInsight]
-
-    # Legacy fields (kept for backward compatibility)
-    strengths: Optional[List[str]] = None
-    areas_for_improvement: Optional[List[str]] = None
-
-    # Enhanced learning plan and recommendations
-    learning_plan_weeks: Optional[List[Dict]] = None
-    industry_readiness_level: Optional[str]
-    readiness_level_justification: Optional[str]
-    interview_prep_technical: Optional[List[str]]
-    interview_prep_behavioral: Optional[List[str]]
-    project_recommendations: Optional[List] = None
-    role_fit: Optional[Any] = None
+    user_id: int
+    test_id: int
     report_status: str
     pdf_generated: Optional[str]
     ai_generated: bool = False
+    
+    # PRI System Fields
+    purpose_score: Optional[float] = None
+    relevance_score: Optional[float] = None
+    identity_score: Optional[float] = None
+    purpose_level: Optional[str] = None
+    relevance_level: Optional[str] = None
+    identity_level: Optional[str] = None
+    archetype: Optional[str] = None
+    display_archetype: Optional[str] = None
+    final_archetype: Optional[str] = None
+    pri_report_md: Optional[str] = None
+    
     created_at: datetime
 
     class Config:
@@ -222,24 +211,14 @@ class SubmissionResponse(BaseModel):
 
 class ScoringResponse(BaseModel):
     submission_id: int
-    fundamentals_score: int
-    applied_score: int
-    industry_score: int
-    total_score: int
-    percentage: float
-    status: str = "Processing insights..."
+    status: str = "Processing..."
     message: str = "Your assessment has been submitted. We're generating your personalized report."
 
     class Config:
         json_schema_extra = {
             "example": {
                 "submission_id": 42,
-                "fundamentals_score": 85,
-                "applied_score": 78,
-                "industry_score": 82,
-                "total_score": 245,
-                "percentage": 81.67,
-                "status": "Processing insights...",
+                "status": "Processing...",
                 "message": "Your assessment has been submitted. We're generating your personalized report."
             }
         }

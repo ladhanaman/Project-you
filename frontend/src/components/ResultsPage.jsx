@@ -2,10 +2,28 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore.js';
-import { getSubmission, getReportDownloadUrl, retryReportGeneration } from '../services/apiService.js';
-import { Download, Loader, CheckCircle, AlertCircle, Award, Target, BookOpen, Briefcase, Home, TrendingUp, TrendingDown, RefreshCw, Clock } from 'lucide-react';
+import { getSubmission, getReportDownloadUrl, retryReportGeneration, getReflectionSession } from '../services/apiService.js';
+import { Download, Loader, CheckCircle, AlertCircle, Award, Target, BookOpen, Briefcase, Home, TrendingUp, TrendingDown, RefreshCw, Clock, Map } from 'lucide-react';
 import MainLayout from './MainLayout.jsx';
-import { ResultsSkeleton } from './Skeleton.jsx';
+
+// PRI Components
+import PRIScoreChart from './PRIScoreChart.jsx';
+import ArchetypeCard from './ArchetypeCard.jsx';
+import ReportViewer from './ReportViewer.jsx';
+import ReflectionJourney from './ReflectionJourney.jsx';
+
+// Simple inline loading skeleton
+const ResultsSkeleton = () => (
+    <MainLayout>
+        <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="animate-pulse">
+                <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div className="h-64 bg-gray-200 rounded mb-6"></div>
+                <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </MainLayout>
+);
 
 export default function ResultsPage() {
     const { submissionId } = useParams();
@@ -14,6 +32,10 @@ export default function ResultsPage() {
     const [isPolling, setIsPolling] = useState(true);
     const [pollError, setPollError] = useState(null);
     const [isRetrying, setIsRetrying] = useState(false);
+
+    // PRI specific state
+    const [reflectionSession, setReflectionSession] = useState(null);
+    const [activeTab, setActiveTab] = useState('report'); // 'report' or 'journey'
 
     // Handle retry for pending_ai submissions
     const handleRetry = async () => {
@@ -39,6 +61,16 @@ export default function ResultsPage() {
 
             if (details.report_status === 'completed' || details.report_status === 'failed' || details.report_status === 'pending_ai') {
                 setIsPolling(false);
+
+                // If completed and it's a PRI submission, fetch reflection session
+                if (details.report_status === 'completed' && (details.archetype || details.pri_report_md)) {
+                    try {
+                        const session = await getReflectionSession(parseInt(submissionId));
+                        setReflectionSession(session);
+                    } catch (e) {
+                        console.error("Failed to fetch reflection session", e);
+                    }
+                }
             }
         } catch (err) {
             setPollError(err.message);
@@ -62,6 +94,16 @@ export default function ResultsPage() {
 
                 if (details.report_status === 'completed' || details.report_status === 'failed' || details.report_status === 'pending_ai') {
                     setIsPolling(false);
+
+                    // If completed and it's a PRI submission, fetch reflection session
+                    if (details.report_status === 'completed' && (details.archetype || details.pri_report_md)) {
+                        try {
+                            const session = await getReflectionSession(parseInt(submissionId));
+                            if (isMounted) setReflectionSession(session);
+                        } catch (e) {
+                            console.error("Failed to fetch reflection session", e);
+                        }
+                    }
                 } else {
                     // Increase interval (exponential backoff)
                     pollInterval = Math.min(pollInterval * 1.2, maxInterval);
@@ -167,232 +209,83 @@ export default function ResultsPage() {
         return <ResultsSkeleton />;
     }
 
+    // Determine if this is a PRI assessment or legacy
+    const isPRIAssessment = !!(submissionDetails.archetype || submissionDetails.pri_report_md);
+
     return (
         <MainLayout>
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">Assessment Complete</h1>
-                    <p className="text-slate-500 text-lg">Here are your results, {user?.full_name}.</p>
+                    <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                        {isPRIAssessment ? "Meet Yourself Report" : "Assessment Complete"}
+                    </h1>
+                    <p className="text-slate-500 text-lg">
+                        {isPRIAssessment
+                            ? `Welcome to your authentic self, ${user?.full_name?.split(' ')[0] || 'friend'}.`
+                            : `Here are your results, ${user?.full_name}.`
+                        }
+                    </p>
                 </div>
 
                 <div className="flex justify-center mb-10">
                     {getStatusBadge()}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                    <ScoreCard
-                        title="Fundamentals"
-                        score={submissionDetails.fundamentals_score}
-                        maxScore={100}
-                    />
-                    <ScoreCard
-                        title="Applied Knowledge"
-                        score={submissionDetails.applied_score}
-                        maxScore={100}
-                    />
-                    <ScoreCard
-                        title="Industry Orientation"
-                        score={submissionDetails.industry_score}
-                        maxScore={100}
-                    />
-                    <ScoreCard
-                        title="Total Score"
-                        score={submissionDetails.total_score}
-                        maxScore={300}
-                        percentage={Math.round((submissionDetails.total_score / 300) * 100)}
-                        isTotal
-                    />
-                </div>
+                {!isPRIAssessment && (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                        <ScoreCard
+                            title="Fundamentals"
+                            score={submissionDetails.fundamentals_score}
+                            maxScore={100}
+                        />
+                        <ScoreCard
+                            title="Applied Knowledge"
+                            score={submissionDetails.applied_score}
+                            maxScore={100}
+                        />
+                        <ScoreCard
+                            title="Industry Orientation"
+                            score={submissionDetails.industry_score}
+                            maxScore={100}
+                        />
+                        <ScoreCard
+                            title="Total Score"
+                            score={submissionDetails.total_score}
+                            maxScore={300}
+                            percentage={Math.round((submissionDetails.total_score / 300) * 100)}
+                            isTotal
+                        />
+                    </div>
+                )}
 
                 {(submissionDetails?.report_status === 'completed' || submissionDetails?.report_status === 'failed') && (
-                    <div className="space-y-6 mb-12">
-                        {/* Industry Readiness Level */}
-                        {submissionDetails.industry_readiness_level && (
-                            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
-                                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Industry Readiness Level</h3>
-                                <div className="text-2xl font-bold text-slate-900 mb-2">{submissionDetails.industry_readiness_level}</div>
-                                {submissionDetails.readiness_level_justification && (
-                                    <p className="text-slate-600 text-sm max-w-2xl mx-auto">{submissionDetails.readiness_level_justification}</p>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Section 1: Fundamentals */}
-                        {submissionDetails.fundamentals_insights && (
-                            <SectionInsights
-                                title="Section 1: Fundamentals"
-                                insights={submissionDetails.fundamentals_insights}
-                                icon={<Award className="text-blue-600" size={20} />}
+                    <>
+                        {isPRIAssessment ? (
+                            <PRIReportView
+                                submissionDetails={submissionDetails}
+                                reflectionSession={reflectionSession}
+                                activeTab={activeTab}
+                                setActiveTab={setActiveTab}
+                                handleDownloadPDF={handleDownloadPDF}
+                                navigate={navigate}
+                                user={user}
                             />
+                        ) : (
+                            <LegacyReportContent submissionDetails={submissionDetails} />
                         )}
-
-                        {/* Section 2: Applied Knowledge */}
-                        {submissionDetails.applied_insights && (
-                            <SectionInsights
-                                title="Section 2: Applied Knowledge"
-                                insights={submissionDetails.applied_insights}
-                                icon={<Target className="text-green-600" size={20} />}
-                            />
-                        )}
-
-                        {/* Section 3: Industry Orientation */}
-                        {submissionDetails.industry_insights && (
-                            <SectionInsights
-                                title="Section 3: Industry Orientation"
-                                insights={submissionDetails.industry_insights}
-                                icon={<Briefcase className="text-purple-600" size={20} />}
-                            />
-                        )}
-
-                        {/* 4-Week Learning Plan */}
-                        {submissionDetails.learning_plan_weeks && submissionDetails.learning_plan_weeks.length > 0 && (
-                            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                                        <BookOpen className="text-slate-700" size={20} />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-slate-900">Personalized 4-Week Learning Plan</h3>
-                                </div>
-                                <div className="space-y-6">
-                                    {submissionDetails.learning_plan_weeks.map((week, index) => (
-                                        <div key={index} className="border-l-4 border-blue-500 bg-slate-50 p-5 rounded-r-lg">
-                                            <div className="font-semibold text-slate-900 text-lg mb-3">Week {index + 1}: {week.focus_area}</div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                                                <div className="text-sm text-slate-600">
-                                                    <strong className="block text-slate-800 mb-1">Tasks:</strong>
-                                                    {week.tasks}
-                                                </div>
-                                                <div className="text-sm text-slate-600">
-                                                    <strong className="block text-slate-800 mb-1">Goal:</strong>
-                                                    {week.expected_outcome}
-                                                </div>
-                                            </div>
-
-                                            {/* Deliverables & Validation (New Fields) */}
-                                            {(week.deliverables || week.validation) && (
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-200 mt-3">
-                                                    {week.deliverables && week.deliverables.length > 0 && (
-                                                        <div className="text-sm">
-                                                            <strong className="block text-slate-800 mb-1">Deliverables:</strong>
-                                                            <ul className="list-disc pl-4 text-slate-600">
-                                                                {week.deliverables.map((d, i) => <li key={i}>{d}</li>)}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-                                                    {week.validation && week.validation.length > 0 && (
-                                                        <div className="text-sm">
-                                                            <strong className="block text-slate-800 mb-1">Validation:</strong>
-                                                            <ul className="list-disc pl-4 text-slate-600">
-                                                                {week.validation.map((v, i) => <li key={i}>{v}</li>)}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Project Recommendations (Enhanced) */}
-                        {submissionDetails.project_recommendations && submissionDetails.project_recommendations.length > 0 && (
-                            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                                        <Target className="text-slate-700" size={20} />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-slate-900">Project Recommendations</h3>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {submissionDetails.project_recommendations.map((project, index) => {
-                                        // Handle both string (legacy) and object (new) formats
-                                        const isObject = typeof project === 'object' && project !== null;
-                                        const title = isObject ? project.title : `Project ${index + 1}`;
-                                        const description = isObject ? project.description : project;
-                                        const tags = isObject ? project.addresses_tags : [];
-                                        const time = isObject ? project.time_estimate : null;
-
-                                        return (
-                                            <div key={index} className="bg-slate-50 rounded-xl p-5 border border-slate-100 flex flex-col h-full">
-                                                <h4 className="font-semibold text-slate-900 mb-2">{title}</h4>
-                                                <p className="text-sm text-slate-600 mb-4 flex-grow">{description}</p>
-
-                                                {tags && tags.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2 mb-3">
-                                                        {tags.map((tag, tIndex) => (
-                                                            <span key={tIndex} className="text-xs px-2 py-1 bg-white border border-slate-200 rounded-md text-slate-500">
-                                                                #{tag}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
-
-                                                {time && (
-                                                    <div className="text-xs text-slate-500 font-medium pt-3 border-t border-slate-200 mt-auto">
-                                                        ⏱ Estimated time: {time}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Role Fit (Enhanced) */}
-                        {submissionDetails.role_fit && (
-                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="p-2 bg-white rounded-lg border border-blue-200">
-                                        <Briefcase className="text-blue-600" size={20} />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-slate-900">Suggested Role Fit</h3>
-                                </div>
-
-                                {(() => {
-                                    // Parse role_fit if it's a JSON string, or use as is if string/object
-                                    let roles = submissionDetails.role_fit;
-                                    try {
-                                        if (typeof roles === 'string' && (roles.startsWith('[') || roles.startsWith('{'))) {
-                                            roles = JSON.parse(roles);
-                                        }
-                                    } catch (e) {
-                                        console.warn("Could not parse role_fit JSON", e);
-                                    }
-
-                                    if (Array.isArray(roles)) {
-                                        return (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {roles.map((role, idx) => (
-                                                    <div key={idx} className="bg-white/60 p-4 rounded-xl border border-blue-100">
-                                                        <h4 className="font-semibold text-blue-900 mb-1">
-                                                            {role.job_title || role.title || "Recommended Role"}
-                                                        </h4>
-                                                        <p className="text-sm text-slate-700 leading-relaxed">
-                                                            {role.role_description || role.description || JSON.stringify(role)}
-                                                        </p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        );
-                                    } else {
-                                        // Legacy string format
-                                        return <p className="text-slate-700 leading-relaxed">{String(roles)}</p>;
-                                    }
-                                })()}
-                            </div>
-                        )}
-                    </div>
+                    </>
                 )}
 
                 {isPolling && submissionDetails?.report_status === 'processing' && (
                     <div className="bg-white rounded-2xl border border-slate-200 p-8 mb-8 text-center shadow-sm">
                         <Loader className="animate-spin mx-auto mb-4 text-slate-400" size={32} />
-                        <h3 className="text-lg font-semibold text-slate-800 mb-2">Generating Report</h3>
+                        <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                            {isPRIAssessment ? "Analyzing Your Psyche" : "Generating Report"}
+                        </h3>
                         <p className="text-slate-500">
-                            Analyzing your responses to generate detailed insights...
+                            {isPRIAssessment
+                                ? "We're calculating your Purpose, Relevance, and Identity scores to generate your personalized archetype..."
+                                : "Analyzing your responses to generate detailed insights..."}
                         </p>
                     </div>
                 )}
@@ -435,24 +328,26 @@ export default function ResultsPage() {
                     </div>
                 )}
 
-                <div className="flex gap-4 justify-center">
-                    {submissionDetails?.pdf_generated && (
+                {!isPRIAssessment && (
+                    <div className="flex gap-4 justify-center">
+                        {submissionDetails?.pdf_generated && (
+                            <button
+                                onClick={handleDownloadPDF}
+                                className="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition shadow-sm hover:shadow-md"
+                            >
+                                <Download size={18} />
+                                Download PDF Report
+                            </button>
+                        )}
                         <button
-                            onClick={handleDownloadPDF}
-                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition shadow-sm hover:shadow-md"
+                            onClick={() => navigate('/dashboard')}
+                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-900 font-medium rounded-xl transition shadow-sm hover:shadow-md border border-slate-200"
                         >
-                            <Download size={18} />
-                            Download PDF Report
+                            <Home size={18} />
+                            Back to Dashboard
                         </button>
-                    )}
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-900 font-medium rounded-xl transition shadow-sm hover:shadow-md border border-slate-200"
-                    >
-                        <Home size={18} />
-                        Back to Dashboard
-                    </button>
-                </div>
+                    </div>
+                )}
             </div>
         </MainLayout>
     );
@@ -522,6 +417,156 @@ function SectionInsights({ title, insights, icon }) {
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+function PRIReportView({ submissionDetails, reflectionSession, activeTab, setActiveTab, handleDownloadPDF, navigate, user }) {
+    return (
+        <div className="space-y-6">
+            {/* Archetype Card - Full Width */}
+            <ArchetypeCard
+                archetype={submissionDetails.archetype}
+                displayArchetype={submissionDetails.display_archetype}
+            />
+
+            {/* Score Chart - Full Width */}
+            {(submissionDetails.purpose_score !== null && submissionDetails.purpose_score !== undefined) && (
+                <PRIScoreChart scores={{
+                    purpose: submissionDetails.purpose_score || 0,
+                    relevance: submissionDetails.relevance_score || 0,
+                    identity: submissionDetails.identity_score || 0
+                }} />
+            )}
+
+            {/* Tabs for Report vs Journey */}
+            <div className="flex justify-center border-b border-gray-200 mt-8">
+                <nav className="flex space-x-8" aria-label="Tabs">
+                    <button
+                        onClick={() => setActiveTab('report')}
+                        className={`
+                            flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                            ${activeTab === 'report'
+                                ? 'border-slate-900 text-slate-900'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                        `}
+                    >
+                        <BookOpen className="w-4 h-4" />
+                        Full Report
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('journey')}
+                        className={`
+                            flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                            ${activeTab === 'journey'
+                                ? 'border-slate-900 text-slate-900'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                        `}
+                    >
+                        <Map className="w-4 h-4" />
+                        7-Day Reflection Journey
+                    </button>
+                </nav>
+            </div>
+
+            {/* Tab Content */}
+            <div className="min-h-[400px]">
+                {activeTab === 'report' ? (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                        <ReportViewer markdownContent={submissionDetails.pri_report_md} />
+                    </div>
+                ) : (
+                    <ReflectionJourney session={reflectionSession} />
+                )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-4 justify-center pt-8 border-t border-gray-100">
+                <button
+                    onClick={handleDownloadPDF}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition shadow-sm hover:shadow-md"
+                >
+                    <Download size={18} />
+                    Download PDF Report
+                </button>
+                <button
+                    onClick={() => navigate('/dashboard')}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 text-slate-900 font-medium rounded-xl transition shadow-sm hover:shadow-md border border-slate-200"
+                >
+                    <Home size={18} />
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// Extracted Legacy Content for cleaner main component
+function LegacyReportContent({ submissionDetails }) {
+    return (
+        <div className="space-y-6">
+            {/* Industry Readiness Level */}
+            {submissionDetails.industry_readiness_level && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
+                    <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Industry Readiness Level</h3>
+                    <div className="text-2xl font-bold text-slate-900 mb-2">{submissionDetails.industry_readiness_level}</div>
+                    {submissionDetails.readiness_level_justification && (
+                        <p className="text-slate-600 text-sm max-w-2xl mx-auto">{submissionDetails.readiness_level_justification}</p>
+                    )}
+                </div>
+            )}
+
+            {/* Section Insights */}
+            {submissionDetails.fundamentals_insights && (
+                <SectionInsights
+                    title="Section 1: Fundamentals"
+                    insights={submissionDetails.fundamentals_insights}
+                    icon={<Award className="text-blue-600" size={20} />}
+                />
+            )}
+            {submissionDetails.applied_insights && (
+                <SectionInsights
+                    title="Section 2: Applied Knowledge"
+                    insights={submissionDetails.applied_insights}
+                    icon={<Target className="text-green-600" size={20} />}
+                />
+            )}
+            {submissionDetails.industry_insights && (
+                <SectionInsights
+                    title="Section 3: Industry Orientation"
+                    insights={submissionDetails.industry_insights}
+                    icon={<Briefcase className="text-purple-600" size={20} />}
+                />
+            )}
+
+            {/* 4-Week Learning Plan */}
+            {submissionDetails.learning_plan_weeks && submissionDetails.learning_plan_weeks.length > 0 && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                            <BookOpen className="text-slate-700" size={20} />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-900">Personalized 4-Week Learning Plan</h3>
+                    </div>
+                    <div className="space-y-6">
+                        {submissionDetails.learning_plan_weeks.map((week, index) => (
+                            <div key={index} className="border-l-4 border-blue-500 bg-slate-50 p-5 rounded-r-lg">
+                                <div className="font-semibold text-slate-900 text-lg mb-3">Week {index + 1}: {week.focus_area}</div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                                    <div className="text-sm text-slate-600">
+                                        <strong className="block text-slate-800 mb-1">Tasks:</strong>
+                                        {week.tasks}
+                                    </div>
+                                    <div className="text-sm text-slate-600">
+                                        <strong className="block text-slate-800 mb-1">Goal:</strong>
+                                        {week.expected_outcome}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

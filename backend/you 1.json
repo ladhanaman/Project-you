@@ -1,0 +1,1062 @@
+{
+  "test_id": 1,
+  "test_title": "Know Yourself",
+  "questions": [
+    {
+      "question_text": "My daily tasks feel like the real me authentic, not a performance.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 0,
+      "weight_p_5": 0,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 0,
+      "weight_r_5": 0,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Alignment",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "I actively chose my current role/life setup it's my decision, not a reaction.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 0,
+      "weight_p_5": 0,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 0,
+      "weight_r_5": 0,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Agency",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "Looking at my week, I recognize myself in how I spend my time.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 0,
+      "weight_p_5": 0,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 0,
+      "weight_r_5": 0,
+      "weight_i_1": 0,
+      "weight_i_2": 25,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Alignment",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "The roles I play feel natural to me not like forced performances.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 0,
+      "weight_p_5": 0,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 0,
+      "weight_r_5": 0,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Integrity",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Integrity",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Integrity",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Integrity",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Integrity",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "I say no to things that don't fit who I am at my core.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 0,
+      "weight_p_5": 0,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 0,
+      "weight_r_5": 0,
+      "weight_i_1": 0,
+      "weight_i_2": 30,
+      "weight_i_3": 50,
+      "weight_i_4": 80,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Agency",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Agency",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "My daily actions reflect my core values.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 20,
+      "weight_p_3": 30,
+      "weight_p_4": 50,
+      "weight_p_5": 70,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 0,
+      "weight_r_5": 0,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Continuity",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Continuity",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Continuity",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Continuity",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Continuity",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "I feel in integrity with the choices I make each day.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 0,
+      "weight_p_5": 0,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 0,
+      "weight_r_5": 0,
+      "weight_i_1": 0,
+      "weight_i_2": 25,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Alignment",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Alignment",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "Who I am shows clearly in what I do others see the real me.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 0,
+      "weight_p_5": 0,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 30,
+      "weight_r_4": 50,
+      "weight_r_5": 70,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Visibility",
+        "Expression"
+      ],
+      "tags_option_2": [
+        "I-Visibility",
+        "Expression"
+      ],
+      "tags_option_3": [
+        "I-Visibility",
+        "Expression"
+      ],
+      "tags_option_4": [
+        "I-Visibility",
+        "Expression"
+      ],
+      "tags_option_5": [
+        "I-Visibility",
+        "Expression"
+      ]
+    },
+    {
+      "question_text": "I lose track of time when absorbed in important tasks.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Never",
+      "option_2": "Rarely",
+      "option_3": "Sometimes",
+      "option_4": "Often",
+      "option_5": "Always",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 20,
+      "weight_p_5": 30,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 50,
+      "weight_r_4": 75,
+      "weight_r_5": 100,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 20,
+      "weight_i_4": 30,
+      "weight_i_5": 50,
+      "tags_option_1": [
+        "R-FLOW",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "R-FLOW",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "R-FLOW",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "R-FLOW",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "R-FLOW",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "My work energizes me rather than drains me by the end of the day.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 20,
+      "weight_p_3": 50,
+      "weight_p_4": 75,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 10,
+      "weight_r_3": 20,
+      "weight_r_4": 50,
+      "weight_r_5": 70,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "P-Vitality",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "P-Vitality",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "P-Vitality",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "P-Vitality",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "P-Vitality",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "The challenges I face match my skills stretching but doable.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 20,
+      "weight_p_5": 30,
+      "weight_r_1": 0,
+      "weight_r_2": 25,
+      "weight_r_3": 50,
+      "weight_r_4": 80,
+      "weight_r_5": 100,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "R-Competence",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "R-Competence",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "R-Competence",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "R-Competence",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "R-Competence",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "Tasks flow naturally I don't need constant willpower to push through.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 20,
+      "weight_p_5": 30,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 40,
+      "weight_r_4": 70,
+      "weight_r_5": 90,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-FLOW",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "I-FLOW",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "I-FLOW",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "I-FLOW",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "I-FLOW",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "I'm using my best abilities effectively on a daily basis.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Never",
+      "option_2": "Rarely",
+      "option_3": "Sometimes",
+      "option_4": "Often",
+      "option_5": "Always",
+      "weight_p_1": 0,
+      "weight_p_2": 30,
+      "weight_p_3": 50,
+      "weight_p_4": 80,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 40,
+      "weight_r_4": 70,
+      "weight_r_5": 90,
+      "weight_i_1": 0,
+      "weight_i_2": 10,
+      "weight_i_3": 30,
+      "weight_i_4": 50,
+      "weight_i_5": 70,
+      "tags_option_1": [
+        "P-Strengths",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "P-Strengths",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "P-Strengths",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "P-Strengths",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "P-Strengths",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "Deep focus comes easily when working on what matters most.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 20,
+      "weight_p_5": 30,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 50,
+      "weight_r_4": 80,
+      "weight_r_5": 100,
+      "weight_i_1": 0,
+      "weight_i_2": 10,
+      "weight_i_3": 20,
+      "weight_i_4": 30,
+      "weight_i_5": 50,
+      "tags_option_1": [
+        "R-Absorption",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "R-Absorption",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "R-Absorption",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "R-Absorption",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "R-Absorption",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "By the end of most days, I feel replenished rather than depleted.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 25,
+      "weight_p_3": 50,
+      "weight_p_4": 75,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 10,
+      "weight_r_3": 20,
+      "weight_r_4": 40,
+      "weight_r_5": 50,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 10,
+      "weight_i_5": 20,
+      "tags_option_1": [
+        "P-Energy",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "P-Energy",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "P-Energy",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "P-Energy",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "P-Energy",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "My tasks stretch me without overwhelming me.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 20,
+      "weight_p_5": 30,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 40,
+      "weight_r_4": 70,
+      "weight_r_5": 90,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 75,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Balance",
+        "Engagement"
+      ],
+      "tags_option_2": [
+        "I-Balance",
+        "Engagement"
+      ],
+      "tags_option_3": [
+        "I-Balance",
+        "Engagement"
+      ],
+      "tags_option_4": [
+        "I-Balance",
+        "Engagement"
+      ],
+      "tags_option_5": [
+        "I-Balance",
+        "Engagement"
+      ]
+    },
+    {
+      "question_text": "My work is needed and valued by others right now.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 20,
+      "weight_p_5": 30,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 50,
+      "weight_r_4": 80,
+      "weight_r_5": 100,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "R-Need",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "R-Need",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "R-Need",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "R-Need",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "R-Need",
+        "Impact"
+      ]
+    },
+    {
+      "question_text": "What I do matters beyond routine tasks or my paycheck.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 25,
+      "weight_p_3": 50,
+      "weight_p_4": 80,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 10,
+      "weight_r_3": 20,
+      "weight_r_4": 40,
+      "weight_r_5": 50,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "P-BeyondSelf",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "P-BeyondSelf",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "P-BeyondSelf",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "P-BeyondSelf",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "P-BeyondSelf",
+        "Impact"
+      ]
+    },
+    {
+      "question_text": "I receive clear feedback showing my work creates real progress.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Never",
+      "option_2": "Rarely",
+      "option_3": "Sometimes",
+      "option_4": "Often",
+      "option_5": "Always",
+      "weight_p_1": 0,
+      "weight_p_2": 10,
+      "weight_p_3": 20,
+      "weight_p_4": 40,
+      "weight_p_5": 50,
+      "weight_r_1": 0,
+      "weight_r_2": 30,
+      "weight_r_3": 50,
+      "weight_r_4": 80,
+      "weight_r_5": 100,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 10,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "R-Progress",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "R-Progress",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "R-Progress",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "R-Progress",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "R-Progress",
+        "Impact"
+      ]
+    },
+    {
+      "question_text": "My daily actions connect to a bigger sense of purpose.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 20,
+      "weight_p_3": 50,
+      "weight_p_4": 80,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 0,
+      "weight_r_4": 20,
+      "weight_r_5": 30,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "P-Direction",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "P-Direction",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "P-Direction",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "P-Direction",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "P-Direction",
+        "Impact"
+      ]
+    },
+    {
+      "question_text": "I bring something uniquely valuable that others can't easily replicate.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 0,
+      "weight_p_3": 0,
+      "weight_p_4": 20,
+      "weight_p_5": 30,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 40,
+      "weight_r_4": 70,
+      "weight_r_5": 100,
+      "weight_i_1": 0,
+      "weight_i_2": 20,
+      "weight_i_3": 50,
+      "weight_i_4": 80,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Distinct",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "I-Distinct",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "I-Distinct",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "I-Distinct",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "I-Distinct",
+        "Impact"
+      ]
+    },
+    {
+      "question_text": "The outcomes of my efforts feel meaningful and worthwhile.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 20,
+      "weight_p_3": 50,
+      "weight_p_4": 80,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 25,
+      "weight_r_3": 50,
+      "weight_r_4": 80,
+      "weight_r_5": 100,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "R-Meaning",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "R-Meaning",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "R-Meaning",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "R-Meaning",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "R-Meaning",
+        "Impact"
+      ]
+    },
+    {
+      "question_text": "Each day builds toward a future vision that excites me.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 20,
+      "weight_p_3": 50,
+      "weight_p_4": 80,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 0,
+      "weight_r_3": 10,
+      "weight_r_4": 30,
+      "weight_r_5": 40,
+      "weight_i_1": 0,
+      "weight_i_2": 0,
+      "weight_i_3": 0,
+      "weight_i_4": 20,
+      "weight_i_5": 30,
+      "tags_option_1": [
+        "P-Future",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "P-Future",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "P-Future",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "P-Future",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "P-Future",
+        "Impact"
+      ]
+    },
+    {
+      "question_text": "The impact I'm making feels sustainable and coherent over time.",
+      "category": "FUNDAMENTALS",
+      "option_1": "Strongly Disagree",
+      "option_2": "Disagree",
+      "option_3": "Neutral",
+      "option_4": "Agree",
+      "option_5": "Strongly Agree",
+      "weight_p_1": 0,
+      "weight_p_2": 20,
+      "weight_p_3": 50,
+      "weight_p_4": 80,
+      "weight_p_5": 100,
+      "weight_r_1": 0,
+      "weight_r_2": 20,
+      "weight_r_3": 40,
+      "weight_r_4": 70,
+      "weight_r_5": 90,
+      "weight_i_1": 0,
+      "weight_i_2": 30,
+      "weight_i_3": 50,
+      "weight_i_4": 80,
+      "weight_i_5": 100,
+      "tags_option_1": [
+        "I-Coherence",
+        "Impact"
+      ],
+      "tags_option_2": [
+        "I-Coherence",
+        "Impact"
+      ],
+      "tags_option_3": [
+        "I-Coherence",
+        "Impact"
+      ],
+      "tags_option_4": [
+        "I-Coherence",
+        "Impact"
+      ],
+      "tags_option_5": [
+        "I-Coherence",
+        "Impact"
+      ]
+    }
+  ]
+}

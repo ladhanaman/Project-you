@@ -4,13 +4,28 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore.js';
 import { submitAssessment, fetchQuestions } from '../services/apiService.js';
 import QuestionCard from './QuestionCard.jsx';
-import Stepper from './Stepper.jsx';
-import LoadingScreen from './LoadingScreen.jsx';
+// Removed Stepper.jsx and LoadingScreen.jsx - using inline components
 import MainLayout from './MainLayout.jsx';
+
+// Inline LoadingScreen replacement
+const LoadingScreen = ({ message }) => (
+  <MainLayout>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">{message}</p>
+      </div>
+    </div>
+  </MainLayout>
+);
+
+// Inline Stepper replacement (removed - not needed for PRI)
+const Stepper = () => null;
 
 export default function AssessmentPortal() {
   const { testId } = useParams();
   const navigate = useNavigate();
+  const isPRI = parseInt(testId) === 1;
 
   const {
     testState,
@@ -80,11 +95,17 @@ export default function AssessmentPortal() {
               }
             }
 
-            // All answered - go to last question
-            return {
-              section: 'industry',
-              index: data.industry.length - 1
-            };
+            // All answered - go to last question of last populated section
+            const sectionsReversed = ['industry', 'applied', 'fundamentals'];
+            for (const section of sectionsReversed) {
+              if (data[section] && data[section].length > 0) {
+                return {
+                  section: section,
+                  index: data[section].length - 1
+                };
+              }
+            }
+            return { section: 'fundamentals', index: 0 };
           };
 
           const firstUnanswered = findFirstUnanswered();
@@ -149,24 +170,48 @@ export default function AssessmentPortal() {
   const handleNext = () => {
     if (testState.currentQuestionIndex < currentSectionQuestions.length - 1) {
       setCurrentQuestionIndex(testState.currentQuestionIndex + 1);
-    } else if (testState.currentSection === 'fundamentals') {
-      setCurrentSection('applied');
-    } else if (testState.currentSection === 'applied') {
-      setCurrentSection('industry');
     } else {
-      handleSubmit();
+      // Find next populated section
+      const sections = ['fundamentals', 'applied', 'industry'];
+      const currentSecIdx = sections.indexOf(testState.currentSection);
+      let nextSec = null;
+
+      for (let i = currentSecIdx + 1; i < sections.length; i++) {
+        if (questions[sections[i]] && questions[sections[i]].length > 0) {
+          nextSec = sections[i];
+          break;
+        }
+      }
+
+      if (nextSec) {
+        setCurrentSection(nextSec);
+        setCurrentQuestionIndex(0);
+      } else {
+        handleSubmit();
+      }
     }
   };
 
   const handlePrev = () => {
     if (testState.currentQuestionIndex > 0) {
       setCurrentQuestionIndex(testState.currentQuestionIndex - 1);
-    } else if (testState.currentSection === 'applied') {
-      setCurrentSection('fundamentals');
-      setCurrentQuestionIndex(questions.fundamentals.length - 1);
-    } else if (testState.currentSection === 'industry') {
-      setCurrentSection('applied');
-      setCurrentQuestionIndex(questions.applied.length - 1);
+    } else {
+      // Find previous populated section
+      const sections = ['fundamentals', 'applied', 'industry'];
+      const currentSecIdx = sections.indexOf(testState.currentSection);
+      let prevSec = null;
+
+      for (let i = currentSecIdx - 1; i >= 0; i--) {
+        if (questions[sections[i]] && questions[sections[i]].length > 0) {
+          prevSec = sections[i];
+          break;
+        }
+      }
+
+      if (prevSec) {
+        setCurrentSection(prevSec);
+        setCurrentQuestionIndex(questions[prevSec].length - 1);
+      }
     }
   };
 
@@ -228,7 +273,7 @@ export default function AssessmentPortal() {
             </div>
           </div>
 
-          <Stepper currentSection={testState.currentSection} />
+          {!isPRI && <Stepper currentSection={testState.currentSection} />}
         </div>
 
         {/* Small top-right popup notification */}

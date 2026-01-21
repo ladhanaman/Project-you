@@ -46,3 +46,5 @@ slowapi>=0.1.9
 
 # Monitoring & Error Tracking
 sentry-sdk[fastapi]>=1.40.0
+
+bleach>=6.1.0

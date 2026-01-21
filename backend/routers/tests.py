@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from core.database import get_db
-from models import User, TestMetadata, Question, CategoryEnum, Submission
+from models import User, TestMetadata, Question, Submission
 from schemas import TestMetadataResponse, QuestionResponse, QuestionsGroupedResponse
 from core.security import get_current_user
 from core.cache import cache_get, cache_set
@@ -80,29 +80,17 @@ def get_test_questions(
     if not test:
         raise HTTPException(status_code=404, detail="Test not found")
     
-    # Fetch questions for this test
-    fundamentals = db.query(Question).filter(
-        Question.test_id == test_id,
-        Question.category == CategoryEnum.FUNDAMENTALS
-    ).all()
+    # Fetch ALL questions for this test (PRI doesn't use categories)
+    all_questions = db.query(Question).filter(Question.test_id == test_id).all()
     
-    applied = db.query(Question).filter(
-        Question.test_id == test_id,
-        Question.category == CategoryEnum.APPLIED
-    ).all()
-    
-    industry = db.query(Question).filter(
-        Question.test_id == test_id,
-        Question.category == CategoryEnum.INDUSTRY
-    ).all()
-    
+    # For compatibility with frontend expecting grouped response, return all in fundamentals
     result = QuestionsGroupedResponse(
-        fundamentals=[QuestionResponse.model_validate(q) for q in fundamentals],
-        applied=[QuestionResponse.model_validate(q) for q in applied],
-        industry=[QuestionResponse.model_validate(q) for q in industry]
+        fundamentals=[QuestionResponse.model_validate(q) for q in all_questions],
+        applied=[],
+        industry=[]
     )
     
     # Cache for 1 hour
-    cache_set(cache_key, result.dict(), ttl=3600)
+    cache_set(cache_key, result.model_dump(), ttl=3600)
     
     return result

@@ -11,15 +11,15 @@ from models import User, TestMetadata, Question, Submission
 
 def init_db():
     """Create all tables"""
-    print("🔨 Creating database tables...")
+    print("Creating database tables...")
     Base.metadata.create_all(bind=engine)
-    print("✅ Database tables created successfully!")
-    print("\n📋 Tables created:")
+    print("Database tables created successfully!")
+    print("\nTables created:")
     print("   - users")
     print("   - test_metadata")
     print("   - questions (with weight_1, weight_2, weight_3, weight_4)")
     print("   - submissions")
-    print("\n💡 Next steps:")
+    print("\nNext steps:")
     print("   1. Run: python scripts/seed_tests.py")
     print("   2. Run: python scripts/seed_questions.py")
 

@@ -11,7 +11,7 @@ import traceback
 
 from core.database import Base, engine
 from core.config import settings
-from routers import auth, tests, submissions, websocket, journey
+from routers import auth, tests, submissions, websocket, journey, pri
 from core.monitoring import init_sentry
 
 # Setup logging
@@ -134,6 +134,7 @@ app.include_router(tests.router)
 app.include_router(submissions.router)
 app.include_router(websocket.router)
 app.include_router(journey.router)
+app.include_router(pri.router)
 
 # ============================================================================
 # ROOT ENDPOINTS

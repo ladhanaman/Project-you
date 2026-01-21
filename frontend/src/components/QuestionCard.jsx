@@ -11,13 +11,14 @@ export default function QuestionCard({
   isLastQuestion = false,
   isSubmitting = false
 }) {
-  // Handle both frontend format (question, options) and backend format (question_text, option_1-4)
+  // Handle both frontend format (question, options) and backend format (question_text, option_1-5)
   const questionText = question.question_text || question.question;
   const options = question.options || [
     question.option_1,
     question.option_2,
     question.option_3,
     question.option_4,
+    question.option_5,
   ].filter(Boolean);
 
   return (

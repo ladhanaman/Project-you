@@ -218,6 +218,45 @@ export const retryReportGeneration = async (submissionId) => {
   }
 };
 
+export const getPRIReport = async (submissionId) => {
+  try {
+    const response = await api.get(`/pri/report/${submissionId}`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+export const getReflectionSession = async (submissionId) => {
+  try {
+    const response = await api.get(`/pri/reflection-session/${submissionId}`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+export const submitDailyReflection = async (dayNumber, answer) => {
+  try {
+    const response = await api.post('/journey/submit', {
+      day_number: dayNumber,
+      answer: answer
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+export const getDailyReflections = async () => {
+  try {
+    const response = await api.get('/journey/history');
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
 export default {
   signup,
   login,
@@ -228,4 +267,8 @@ export default {
   getSubmission,
   getReportDownloadUrl,
   retryReportGeneration,
+  getPRIReport,
+  getReflectionSession,
+  submitDailyReflection,
+  getDailyReflections,
 };

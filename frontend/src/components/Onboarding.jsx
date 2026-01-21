@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Calendar, MapPin, Home, Briefcase, Heart, ArrowRight, BookOpen, GraduationCap, Globe, Users } from 'lucide-react'; 
+import { User, Calendar, MapPin, Home, Briefcase, Heart, ArrowRight, BookOpen, GraduationCap, Globe, Users } from 'lucide-react';
 import { completeOnboarding } from '../services/apiService';
 import { useStore } from '../store/useStore';
 
@@ -10,18 +10,21 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Updated state with new fields
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    date_of_birth: '',
-    gender: '',        // New
-    city: '',
-    address: '',
-    occupation: '',
-    education: '',     // New
-    industry_domain: '', // New
-    hobbies: ''
+  // Updated state with new fields - auto-populate from user's full_name
+  const [formData, setFormData] = useState(() => {
+    const nameParts = user?.full_name?.split(' ') || ['', ''];
+    return {
+      first_name: nameParts[0] || '',
+      last_name: nameParts.slice(1).join(' ') || '',
+      date_of_birth: '',
+      gender: '',        // New
+      city: '',
+      address: '',
+      occupation: '',
+      education: '',     // New
+      industry_domain: '', // New
+      hobbies: ''
+    };
   });
 
   const handleChange = (e) => {
@@ -76,7 +79,7 @@ export default function Onboarding() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            
+
             {/* Row 1: Name & Surname */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
@@ -154,25 +157,8 @@ export default function Onboarding() {
               </div>
             </div>
 
-            {/* Row 3: City & Address */}
+            {/* Row 3: Address & City (SWAPPED) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  City *
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition"
-                    placeholder="Mumbai, Pune..."
-                  />
-                </div>
-              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Address *
@@ -187,6 +173,23 @@ export default function Onboarding() {
                     required
                     className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition"
                     placeholder="Street, Area..."
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  City *
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition"
+                    placeholder="Mumbai, Pune..."
                   />
                 </div>
               </div>

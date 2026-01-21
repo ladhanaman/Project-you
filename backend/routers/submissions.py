@@ -12,15 +12,157 @@ from slowapi.util import get_remote_address
 limiter = Limiter(key_func=get_remote_address)
 
 from core.database import get_db
-from models import User, Question, Submission, TestMetadata, CategoryEnum
+from models import User, Question, Submission, TestMetadata, ReflectionSession
 from schemas import AssessmentSubmission, ScoringResponse, SubmissionResponse
 from core.security import get_current_user
 from core.monitoring import capture_exception
+from services.pri.calculator import PRICalculator
+from services.pri.archetype_classifier import ArchetypeClassifier
+from services.pri.report_generator import PRIReportGenerator
+from services.pri.reflection_generator import ReflectionSessionGenerator
 import sentry_sdk
+from datetime import date
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/submissions", tags=["Submissions"])
+
+
+def process_pri_assessment(
+    db_submission: Submission,
+    question_map: Dict,
+    answers: List,
+    current_user: User,
+    db: Session
+):
+    """
+    Process PRI assessment: calculate scores, classify archetype, generate report and session.
+    
+    Args:
+        db_submission: The submission record
+        question_map: Dict of question_id -> Question object
+        answers: List of answer submissions
+        current_user: Current user object
+        db: Database session
+    """
+    try:
+        # Helper to get option index (supports 5 options)
+        def get_option_index_pri(selected_answer: str, question: Question) -> int:
+            """Map selected answer to option index (1-5)"""
+            selected_answer = selected_answer.strip()
+            options = [
+                question.option_1,
+                question.option_2,
+                question.option_3,
+                question.option_4,
+                question.option_5
+            ]
+            
+            for idx, option in enumerate(options, 1):
+                if option and selected_answer == option.strip():
+                    return idx
+            
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid answer '{selected_answer}' for question {question.id}"
+            )
+        
+        # Collect answers with PRI weights
+        answers_with_weights = []
+        positive_tags = set()
+        negative_tags = set()
+        
+        for answer_sub in answers:
+            question = question_map[answer_sub.question_id]
+            option_index = get_option_index_pri(answer_sub.selected_answer, question)
+            pri_weights = question.get_pri_weights(option_index)
+            
+            answers_with_weights.append({
+                'question_id': question.id,
+                'selected_option': option_index,
+                'weights': pri_weights
+            })
+            
+            # Use option-specific tags for better signal tracking
+            option_tags = question.get_option_tags(option_index)
+            
+            # Track positive tags (high scores) and negative tags (low scores)
+            avg_weight = (pri_weights['P'] + pri_weights['R'] + pri_weights['I']) / 3
+            if avg_weight >= 60 and option_tags:  # High average (60+ out of 100)
+                positive_tags.update(option_tags)
+            elif avg_weight <= 30 and option_tags:  # Low average (30 or below out of 100)
+                negative_tags.update(option_tags)
+        
+        # Calculate PRI scores
+        calculator = PRICalculator()
+        user_age = None
+        if current_user.date_of_birth:
+            today = date.today()
+            user_age = today.year - current_user.date_of_birth.year
+            if today.month < current_user.date_of_birth.month or \
+               (today.month == current_user.date_of_birth.month and today.day < current_user.date_of_birth.day):
+                user_age -= 1
+        
+        pri_results = calculator.calculate_pri_scores(
+            answers=answers_with_weights,
+            user_age=user_age
+        )
+        
+        # Classify archetype
+        classifier = ArchetypeClassifier()
+        archetype_results = classifier.classify(
+            purpose_level=pri_results['purpose_level'],
+            relevance_level=pri_results['relevance_level'],
+            identity_level=pri_results['identity_level'],
+            age_category=pri_results['age_category']
+        )
+        
+        # Update submission with PRI data (store as 0-1 float scale)
+        db_submission.purpose_score = pri_results['purpose_score']
+        db_submission.relevance_score = pri_results['relevance_score']
+        db_submission.identity_score = pri_results['identity_score']
+        db_submission.purpose_level = pri_results['purpose_level'][0]  # H, M, or L
+        db_submission.relevance_level = pri_results['relevance_level'][0]
+        db_submission.identity_level = pri_results['identity_level'][0]
+        db_submission.archetype = archetype_results['internal_base_archetype']
+        db_submission.display_archetype = archetype_results['display_archetype']
+        db_submission.final_archetype = archetype_results['final_archetype']
+        db_submission.positive_tags = list(positive_tags)[:10]  # Top 10
+        db_submission.negative_tags = list(negative_tags)[:10]
+        
+        logger.info(f"PRI scores calculated for submission {db_submission.id}: " +
+                   f"P={pri_results['purpose_score']:.2f}, " +
+                   f"R={pri_results['relevance_score']:.2f}, " +
+                   f"I={pri_results['identity_score']:.2f}, " +
+                   f"Archetype={archetype_results['final_archetype']}")
+        
+        # Generate PRI report (asynchronously handled, so just mark status)
+        db_submission.report_status = "processing_pri"
+        db.commit()
+        
+        # Store generation request in background
+        # We'll generate the report and reflection session after commit
+        return {
+            'pri_results': pri_results,
+            'archetype_results': archetype_results,
+            'user_profile': {
+                'name': current_user.first_name or current_user.full_name,
+                'age': user_age,
+                'city': current_user.city,
+                'occupation': current_user.occupation,
+                'education': current_user.education,
+                'industry': current_user.industry_domain,
+                'hobbies': current_user.hobbies
+            },
+            'signals': {
+                'positive_tags': list(positive_tags)[:10],
+                'negative_tags': list(negative_tags)[:10]
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error processing PRI assessment: {str(e)}")
+        raise
 
 
 @router.post("", response_model=ScoringResponse)
@@ -84,7 +226,7 @@ def submit_assessment(
         
         # Helper to get option index
         def get_option_index(selected_answer: str, question: Question) -> int:
-            """Map selected answer to option index (1-4)"""
+            """Map selected answer to option index (1-5)"""
             selected_answer = selected_answer.strip()
             
             if selected_answer == question.option_1.strip():
@@ -95,6 +237,8 @@ def submit_assessment(
                 return 3
             elif selected_answer == question.option_4.strip():
                 return 4
+            elif question.option_5 and selected_answer == question.option_5.strip():
+                return 5
             
             # Raise error instead of silent failure
             raise HTTPException(
@@ -102,58 +246,16 @@ def submit_assessment(
                 detail=f"Invalid answer '{selected_answer}' for question {question.id}"
             )
         
-        for answer_submission in submission.answers:
-            question = question_map[answer_submission.question_id]
-            
-            # Get weight for selected option
-            option_index = get_option_index(answer_submission.selected_answer, question)
-            weight = question.get_weight(option_index)
-            
-            # Determine section key
-            if question.category == CategoryEnum.FUNDAMENTALS:
-                section_key = 'fundamentals'
-            elif question.category == CategoryEnum.APPLIED:
-                section_key = 'applied'
-            else:
-                section_key = 'industry'
-            
-            tags = question.tags or []
-            
-            # Three-tier classification (per section AND global)
-            if weight == 3:
-                # Strong: Correct answer
-                if question.category == CategoryEnum.FUNDAMENTALS:
-                    scores['fundamentals'] += 20
-                elif question.category == CategoryEnum.APPLIED:
-                    scores['applied'] += 20
-                elif question.category == CategoryEnum.INDUSTRY:
-                    scores['industry'] += 20
-                
-                section_tags[section_key]['strong'].update(tags)
-                all_strong_tags.update(tags)
-            
-            elif weight == 2:
-                # Weak: Partial understanding
-                section_tags[section_key]['weak'].update(tags)
-                all_weak_tags.update(tags)
-            
-            else:  # weight 0 or 1
-                # Critical: Fundamental gap
-                section_tags[section_key]['critical'].update(tags)
-                all_critical_tags.update(tags)
+        # PRI assessment doesn't use legacy category-based scoring
+        # All scoring is done by PRI calculator based on P/R/I weights
+        # Skip legacy weight calculation
         
         scores['total'] = scores['fundamentals'] + scores['applied'] + scores['industry']
         
-        # Create submission record
+        # Create submission record (PRI-only fields)
         db_submission = Submission(
             user_id=current_user.id,
             test_id=submission.test_id,
-            candidate_name=current_user.full_name,
-            candidate_email=current_user.email,
-            fundamentals_score=scores['fundamentals'],
-            applied_score=scores['applied'],
-            industry_score=scores['industry'],
-            total_score=scores['total'],
             answers={a.question_id: a.selected_answer for a in submission.answers},
             report_status="processing"
         )
@@ -162,20 +264,70 @@ def submit_assessment(
         db.commit()
         db.refresh(db_submission)
         
+        # Check if this is a PRI assessment (Know Yourself test)
+        is_pri_assessment = test.title == "Know Yourself"
+        
+        if is_pri_assessment:
+            # Process PRI assessment
+            try:
+                pri_data = process_pri_assessment(
+                    db_submission=db_submission,
+                    question_map=question_map,
+                    answers=submission.answers,
+                    current_user=current_user,
+                    db=db
+                )
+                
+                # Generate PRI report and reflection session in BACKGROUND
+                try:
+                    from tasks.report_tasks import generate_pri_report_task
+                    
+                    # Prepare data for background task
+                    user_profile_data = pri_data['user_profile']
+                    pri_scores_data = {
+                        'purpose_score': pri_data['pri_results']['purpose_score'],
+                        'relevance_score': pri_data['pri_results']['relevance_score'],
+                        'identity_score': pri_data['pri_results']['identity_score'],
+                        'purpose_level': pri_data['pri_results']['purpose_level'],
+                        'relevance_level': pri_data['pri_results']['relevance_level'],
+                        'identity_level': pri_data['pri_results']['identity_level']
+                    }
+                    
+                    background_tasks.add_task(
+                        generate_pri_report_task,
+                        db_submission.id,
+                        current_user.full_name,
+                        pri_scores_data,
+                        pri_data['archetype_results'],
+                        pri_data['signals'],
+                        user_profile_data
+                    )
+                    
+                    logger.info(f"Queued PRI report generation task for submission {db_submission.id}")
+                
+                except Exception as task_error:
+                    logger.error(f"Failed to queue PRI background task: {task_error}")
+                    db_submission.report_status = "failed"
+                    db.commit()
+            
+            except Exception as pri_error:
+                logger.error(f"Error in PRI processing: {str(pri_error)}")
+                capture_exception(pri_error, context={"submission_id": db_submission.id})
+        
+
         # Prepare data for background task (with tags classification)
         answers_data = []
         for answer_submission in submission.answers:
             question = question_map[answer_submission.question_id]
             option_index = get_option_index(answer_submission.selected_answer, question)
-            weight = question.get_weight(option_index)
+            # Legacy get_weight() removed - PRI uses get_pri_weights()
             
             answers_data.append({
                 'id': question.id,
                 'question_text': question.question_text,
                 'tags': question.tags,
                 'selected_answer': answer_submission.selected_answer,
-                'earned_weight': weight,
-                'category': question.category.value
+                'earned_weight': 0  # PRI uses different weight system
             })
         
         # Section-specific tag classification for insights
@@ -203,31 +355,30 @@ def submit_assessment(
         }
         
         
-        # Trigger background task for insights and PDF
-        try:
-            from tasks.report_tasks import generate_insights_and_report_task
-            background_tasks.add_task(
-                generate_insights_and_report_task,
-                db_submission.id,
-                current_user.full_name,
-                current_user.email,
-                scores,
-                answers_data,
-                tag_classification  # Pass tag classification
-            )
-
-            
-
-        except Exception as e:
-            logger.error(f"Failed to queue background task: {e}")
-            capture_exception(e, context={"submission_id": db_submission.id})
-
-            # Update status to failed so user is not stuck in processing
+        # Trigger background task for insights and PDF for LEGACY assessments only
+        # PRI assessments handle their own generation synchronously above
+        if not is_pri_assessment:
             try:
-                db_submission.report_status = "failed"
-                db.commit()
-            except Exception as db_err:
-                logger.error(f"Failed to update submission status to failed: {db_err}")
+                from tasks.report_tasks import generate_insights_and_report_task
+                background_tasks.add_task(
+                    generate_insights_and_report_task,
+                    db_submission.id,
+                    current_user.full_name,
+                    current_user.email,
+                    scores,
+                    answers_data,
+                    tag_classification  # Pass tag classification
+                )
+            except Exception as e:
+                logger.error(f"Failed to queue background task: {e}")
+                capture_exception(e, context={"submission_id": db_submission.id})
+
+                # Update status to failed so user is not stuck in processing
+                try:
+                    db_submission.report_status = "failed"
+                    db.commit()
+                except Exception as db_err:
+                    logger.error(f"Failed to update submission status to failed: {db_err}")
 
             # Continue even if task queueing fails
         
@@ -237,12 +388,7 @@ def submit_assessment(
         )
         
         return ScoringResponse(
-            submission_id=db_submission.id,
-            fundamentals_score=scores['fundamentals'],
-            applied_score=scores['applied'],
-            industry_score=scores['industry'],
-            total_score=scores['total'],
-            percentage=round((scores['total'] / 300) * 100, 2)
+            submission_id=db_submission.id
         )
     
     except HTTPException:
