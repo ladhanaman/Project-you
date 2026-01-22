@@ -173,7 +173,14 @@ class QuestionResponse(BaseModel):
         from_attributes = True
 
 
+class QuestionsResponse(BaseModel):
+    """Simplified response returning flat array of questions"""
+    questions: List[QuestionResponse]
+
+
+# Keep for backward compatibility (deprecated)
 class QuestionsGroupedResponse(BaseModel):
+    """DEPRECATED: Use QuestionsResponse instead"""
     fundamentals: List[QuestionResponse]
     applied: List[QuestionResponse]
     industry: List[QuestionResponse]

@@ -83,6 +83,48 @@ export default function ResultsPage() {
         const maxInterval = 30000; // Cap at 30s
         const maxAttempts = 20; // Stop after ~100 seconds total
 
+        // Separate polling for reflection session
+        let sessionPollInterval = null;
+        let sessionPollAttempts = 0;
+        const maxSessionAttempts = 6; // Poll for 30 seconds (5s * 6)
+
+        const pollReflectionSession = async () => {
+            if (!isMounted || !submissionId) return false;
+
+            try {
+                const session = await getReflectionSession(parseInt(submissionId));
+                if (isMounted) {
+                    setReflectionSession(session);
+                    return true; // Success
+                }
+            } catch (e) {
+                console.log('Reflection session not ready yet, will retry...', e.message);
+                return false; // Not ready yet
+            }
+            return false;
+        };
+
+        const startSessionPolling = () => {
+            // Try immediately first
+            pollReflectionSession().then(success => {
+                if (success || !isMounted) return;
+
+                // If not successful, start polling
+                sessionPollInterval = setInterval(async () => {
+                    sessionPollAttempts++;
+
+                    const success = await pollReflectionSession();
+
+                    if (success || sessionPollAttempts >= maxSessionAttempts) {
+                        clearInterval(sessionPollInterval);
+                        if (!success) {
+                            console.warn('Reflection session polling stopped after max attempts');
+                        }
+                    }
+                }, 5000); // Poll every 5 seconds
+            });
+        };
+
         const poll = async () => {
             if (!isMounted || !submissionId) return;
 
@@ -95,14 +137,9 @@ export default function ResultsPage() {
                 if (details.report_status === 'completed' || details.report_status === 'failed' || details.report_status === 'pending_ai') {
                     setIsPolling(false);
 
-                    // If completed and it's a PRI submission, fetch reflection session
+                    // If completed and it's a PRI submission, start polling for reflection session
                     if (details.report_status === 'completed' && (details.archetype || details.pri_report_md)) {
-                        try {
-                            const session = await getReflectionSession(parseInt(submissionId));
-                            if (isMounted) setReflectionSession(session);
-                        } catch (e) {
-                            console.error("Failed to fetch reflection session", e);
-                        }
+                        startSessionPolling();
                     }
                 } else {
                     // Increase interval (exponential backoff)
@@ -132,6 +169,9 @@ export default function ResultsPage() {
 
         return () => {
             isMounted = false;
+            if (sessionPollInterval) {
+                clearInterval(sessionPollInterval);
+            }
         };
     }, [isPolling, submissionId, setSubmissionDetails]);
 
@@ -216,7 +256,7 @@ export default function ResultsPage() {
         <MainLayout>
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
                         {isPRIAssessment ? "Meet Yourself Report" : "Assessment Complete"}
                     </h1>
                     <p className="text-slate-500 text-lg">
@@ -329,11 +369,11 @@ export default function ResultsPage() {
                 )}
 
                 {!isPRIAssessment && (
-                    <div className="flex gap-4 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {submissionDetails?.pdf_generated && (
                             <button
                                 onClick={handleDownloadPDF}
-                                className="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition shadow-sm hover:shadow-md"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-button-gradient text-white font-medium rounded-xl transition shadow-sm hover:shadow-md"
                             >
                                 <Download size={18} />
                                 Download PDF Report
@@ -341,7 +381,7 @@ export default function ResultsPage() {
                         )}
                         <button
                             onClick={() => navigate('/dashboard')}
-                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-900 font-medium rounded-xl transition shadow-sm hover:shadow-md border border-slate-200"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-accent-lighter text-gray-900 font-medium rounded-xl transition shadow-sm hover:shadow-md border border-theme"
                         >
                             <Home size={18} />
                             Back to Dashboard
@@ -378,9 +418,9 @@ function ScoreCard({ title, score, maxScore, percentage, isTotal = false }) {
 
 function SectionInsights({ title, insights, icon }) {
     return (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white border border-theme rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                <div className="p-2 bg-accent-lighter rounded-lg border border-accent-light">
                     {icon}
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
@@ -440,14 +480,14 @@ function PRIReportView({ submissionDetails, reflectionSession, activeTab, setAct
             )}
 
             {/* Tabs for Report vs Journey */}
-            <div className="flex justify-center border-b border-gray-200 mt-8">
-                <nav className="flex space-x-8" aria-label="Tabs">
+            <div className="flex justify-center border-b border-gray-200 mt-8 overflow-x-auto">
+                <nav className="flex space-x-8 min-w-max px-4" aria-label="Tabs">
                     <button
                         onClick={() => setActiveTab('report')}
                         className={`
                             flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
                             ${activeTab === 'report'
-                                ? 'border-slate-900 text-slate-900'
+                                ? 'border-accent text-accent'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                         `}
                     >
@@ -459,7 +499,7 @@ function PRIReportView({ submissionDetails, reflectionSession, activeTab, setAct
                         className={`
                             flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
                             ${activeTab === 'journey'
-                                ? 'border-slate-900 text-slate-900'
+                                ? 'border-accent text-accent'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                         `}
                     >
@@ -472,7 +512,7 @@ function PRIReportView({ submissionDetails, reflectionSession, activeTab, setAct
             {/* Tab Content */}
             <div className="min-h-[400px]">
                 {activeTab === 'report' ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-8">
                         <ReportViewer markdownContent={submissionDetails.pri_report_md} />
                     </div>
                 ) : (
@@ -481,17 +521,17 @@ function PRIReportView({ submissionDetails, reflectionSession, activeTab, setAct
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4 justify-center pt-8 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 border-t border-gray-100">
                 <button
                     onClick={handleDownloadPDF}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition shadow-sm hover:shadow-md"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-button-gradient text-white font-medium rounded-xl transition shadow-sm hover:shadow-md"
                 >
                     <Download size={18} />
                     Download PDF Report
                 </button>
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 text-slate-900 font-medium rounded-xl transition shadow-sm hover:shadow-md border border-slate-200"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-accent-lighter text-gray-900 font-medium rounded-xl transition shadow-sm hover:shadow-md border border-theme"
                 >
                     <Home size={18} />
                     Back to Dashboard
@@ -507,7 +547,7 @@ function LegacyReportContent({ submissionDetails }) {
         <div className="space-y-6">
             {/* Industry Readiness Level */}
             {submissionDetails.industry_readiness_level && (
-                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
+                <div className="bg-white border border-theme rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
                     <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Industry Readiness Level</h3>
                     <div className="text-2xl font-bold text-slate-900 mb-2">{submissionDetails.industry_readiness_level}</div>
                     {submissionDetails.readiness_level_justification && (
@@ -535,15 +575,15 @@ function LegacyReportContent({ submissionDetails }) {
                 <SectionInsights
                     title="Section 3: Industry Orientation"
                     insights={submissionDetails.industry_insights}
-                    icon={<Briefcase className="text-purple-600" size={20} />}
+                    icon={<Briefcase className="text-accent" size={20} />}
                 />
             )}
 
             {/* 4-Week Learning Plan */}
             {submissionDetails.learning_plan_weeks && submissionDetails.learning_plan_weeks.length > 0 && (
-                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white border border-theme rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                        <div className="p-2 bg-accent-lighter rounded-lg border border-accent-light">
                             <BookOpen className="text-slate-700" size={20} />
                         </div>
                         <h3 className="text-lg font-semibold text-slate-900">Personalized 4-Week Learning Plan</h3>

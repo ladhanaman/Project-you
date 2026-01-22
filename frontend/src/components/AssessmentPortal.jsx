@@ -12,7 +12,7 @@ const LoadingScreen = ({ message }) => (
   <MainLayout>
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
         <p className="text-gray-600">{message}</p>
       </div>
     </div>
@@ -29,7 +29,6 @@ export default function AssessmentPortal() {
 
   const {
     testState,
-    setCurrentSection,
     setCurrentQuestionIndex,
     setAnswer,
     user,
@@ -62,7 +61,7 @@ export default function AssessmentPortal() {
       try {
         const testIdNum = parseInt(testId);
         const data = await fetchQuestions(testIdNum);
-        setQuestions(data);
+        setQuestions(data.questions);  // Extract questions array from response
         setCurrentTestId(testIdNum);
 
         // Try to load saved test state
@@ -71,46 +70,21 @@ export default function AssessmentPortal() {
         if (wasRestored) {
           // Find first unanswered question
           const findFirstUnanswered = () => {
-            // Access the current state from the store directly to ensure it's the loaded state
             const { answers } = useStore.getState().testState;
 
-            // Check fundamentals
-            for (let i = 0; i < data.fundamentals.length; i++) {
-              if (!answers[data.fundamentals[i].id]) {
-                return { section: 'fundamentals', index: i };
+            // Find first unanswered question in the flat array
+            for (let i = 0; i < data.questions.length; i++) {
+              if (!answers[data.questions[i].id]) {
+                return i;
               }
             }
 
-            // Check applied
-            for (let i = 0; i < data.applied.length; i++) {
-              if (!answers[data.applied[i].id]) {
-                return { section: 'applied', index: i };
-              }
-            }
-
-            // Check industry
-            for (let i = 0; i < data.industry.length; i++) {
-              if (!answers[data.industry[i].id]) {
-                return { section: 'industry', index: i };
-              }
-            }
-
-            // All answered - go to last question of last populated section
-            const sectionsReversed = ['industry', 'applied', 'fundamentals'];
-            for (const section of sectionsReversed) {
-              if (data[section] && data[section].length > 0) {
-                return {
-                  section: section,
-                  index: data[section].length - 1
-                };
-              }
-            }
-            return { section: 'fundamentals', index: 0 };
+            // All answered - go to last question
+            return data.questions.length - 1;
           };
 
-          const firstUnanswered = findFirstUnanswered();
-          setCurrentSection(firstUnanswered.section);
-          setCurrentQuestionIndex(firstUnanswered.index);
+          const firstUnansweredIndex = findFirstUnanswered();
+          setCurrentQuestionIndex(firstUnansweredIndex);
 
           setRestoredProgress(true);
           timeoutId = setTimeout(() => setRestoredProgress(false), 2000);
@@ -133,14 +107,9 @@ export default function AssessmentPortal() {
     };
   }, [testId, setQuestions, resetTestState, loadTestState, setCurrentTestId]);
 
-  const currentSectionQuestions = questions[testState.currentSection] || [];
-  const currentQuestion = currentSectionQuestions[testState.currentQuestionIndex];
+  const currentQuestion = questions[testState.currentQuestionIndex];
   const answeredCount = Object.values(testState.answers).length;
-
-  const totalQuestions =
-    questions.fundamentals.length +
-    questions.applied.length +
-    questions.industry.length;
+  const totalQuestions = questions.length;
 
   const handleAnswer = (option) => {
     if (currentQuestion) {
@@ -168,50 +137,17 @@ export default function AssessmentPortal() {
   };
 
   const handleNext = () => {
-    if (testState.currentQuestionIndex < currentSectionQuestions.length - 1) {
+    if (testState.currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(testState.currentQuestionIndex + 1);
     } else {
-      // Find next populated section
-      const sections = ['fundamentals', 'applied', 'industry'];
-      const currentSecIdx = sections.indexOf(testState.currentSection);
-      let nextSec = null;
-
-      for (let i = currentSecIdx + 1; i < sections.length; i++) {
-        if (questions[sections[i]] && questions[sections[i]].length > 0) {
-          nextSec = sections[i];
-          break;
-        }
-      }
-
-      if (nextSec) {
-        setCurrentSection(nextSec);
-        setCurrentQuestionIndex(0);
-      } else {
-        handleSubmit();
-      }
+      // Last question - submit
+      handleSubmit();
     }
   };
 
   const handlePrev = () => {
     if (testState.currentQuestionIndex > 0) {
       setCurrentQuestionIndex(testState.currentQuestionIndex - 1);
-    } else {
-      // Find previous populated section
-      const sections = ['fundamentals', 'applied', 'industry'];
-      const currentSecIdx = sections.indexOf(testState.currentSection);
-      let prevSec = null;
-
-      for (let i = currentSecIdx - 1; i >= 0; i--) {
-        if (questions[sections[i]] && questions[sections[i]].length > 0) {
-          prevSec = sections[i];
-          break;
-        }
-      }
-
-      if (prevSec) {
-        setCurrentSection(prevSec);
-        setCurrentQuestionIndex(questions[prevSec].length - 1);
-      }
     }
   };
 
@@ -255,33 +191,32 @@ export default function AssessmentPortal() {
 
   return (
     <MainLayout>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-full sm:max-w-3xl mx-auto px-4 sm:px-0">
         <div className="mb-10">
-          <div className="flex justify-between items-end mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-8 gap-4 sm:gap-0">
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Assessment Portal</h1>
               <p className="text-slate-500 mt-1">Candidate: {user?.full_name}</p>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                 Progress
               </div>
               <div className="text-xl font-bold text-slate-900">
                 {testState.currentQuestionIndex + 1}{' '}
-                <span className="text-slate-400 font-normal">/ {currentSectionQuestions.length}</span>
+                <span className="text-slate-400 font-normal">/ {totalQuestions}</span>
               </div>
             </div>
           </div>
 
-          {!isPRI && <Stepper currentSection={testState.currentSection} />}
+          {!isPRI && <Stepper />}
         </div>
 
-        {/* Small top-right popup notification */}
+        {/* Progress restoration notification */}
         {restoredProgress && (
           <div className="fixed top-6 right-6 bg-slate-800 text-slate-100 px-4 py-2.5 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 animate-fade-in">
             <span>
-              Resumed at {testState.currentSection === 'fundamentals' ? 'Fundamentals' :
-                testState.currentSection === 'applied' ? 'Applied' : 'Industry'}
+              Progress Restored - Question {testState.currentQuestionIndex + 1}
             </span>
           </div>
         )}
@@ -299,10 +234,7 @@ export default function AssessmentPortal() {
           onNext={handleNext}
           onPrev={handlePrev}
           hasAnswered={testState.answers[currentQuestion.id]}
-          isLastQuestion={
-            testState.currentSection === 'industry' &&
-            testState.currentQuestionIndex === currentSectionQuestions.length - 1
-          }
+          isLastQuestion={testState.currentQuestionIndex === totalQuestions - 1}
           isSubmitting={isSubmitting}
         />
 

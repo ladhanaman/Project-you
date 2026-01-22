@@ -3,7 +3,7 @@ import { Award, Star, Compass } from 'lucide-react';
 
 const ArchetypeCard = ({ archetype, displayArchetype }) => {
     return (
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-lg text-white p-8 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-lg text-white p-6 sm:p-8 relative overflow-hidden">
             {/* Decorative background elements */}
             <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-purple-400 opacity-10 rounded-full blur-2xl"></div>
@@ -23,7 +23,7 @@ const ArchetypeCard = ({ archetype, displayArchetype }) => {
                         Your Core Archetype
                     </div>
 
-                    <h2 className="text-3xl font-bold mb-2">
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">
                         {displayArchetype || "Discovering..."}
                     </h2>
 
@@ -34,7 +34,7 @@ const ArchetypeCard = ({ archetype, displayArchetype }) => {
 
                 {/* Optional Action Button */}
                 {/* <div className="mt-6 md:mt-0">
-            <button className="bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-2 rounded-lg font-semibold transition-colors shadow-sm">
+            <button className="bg-white text-accent hover:bg-accent-light px-6 py-2 rounded-lg font-semibold transition-colors shadow-sm">
                 Explore Details
             </button>
         </div> */}

@@ -73,9 +73,9 @@ const PRIScoreChart = ({ scores }) => {
     );
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 mb-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-8 mb-6">
             <h3 className="text-xl font-bold text-slate-900 mb-6 text-center">Your PRI Profile</h3>
-            <div className="flex justify-around items-start">
+            <div className="flex flex-col sm:flex-row justify-around items-center sm:items-start gap-8 sm:gap-0">
                 <ScoreCircle
                     label="Purpose"
                     score={purposePercent}

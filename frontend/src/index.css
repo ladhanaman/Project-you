@@ -5,6 +5,327 @@
   --font-sans: 'Inter', sans-serif;
 }
 
+/* ========================================
+   THEME SYSTEM - CSS Custom Properties
+   ======================================== */
+
+/* Classic Theme (Original Slate) - DEFAULT */
+:root,
+[data-theme="classic"] {
+  /* Primary Colors */
+  --color-primary: 71 85 105;
+  /* slate-600 in RGB */
+  --color-primary-dark: 51 65 85;
+  /* slate-700 */
+  --color-secondary: 100 116 139;
+  /* slate-500 */
+
+  /* Background Gradients */
+  --bg-gradient-start: 248 250 252;
+  /* slate-50 */
+  --bg-gradient-mid: 241 245 249;
+  /* slate-100 */
+  --bg-gradient-end: 226 232 240;
+  /* slate-200 */
+
+  /* Text */
+  --text-primary: 15 23 42;
+  /* slate-900 */
+  --text-secondary: 71 85 105;
+  /* slate-600 */
+  --text-tertiary: 100 116 139;
+  /* slate-500 */
+
+  /* Surface/Card */
+  --surface-base: 255 255 255;
+  /* white */
+  --surface-elevated: 248 250 252;
+  /* slate-50 */
+
+  /* Borders */
+  --border-color: 226 232 240;
+  /* slate-200 */
+  --border-hover: 203 213 225;
+  /* slate-300 */
+
+  /* Accent for buttons/CTAs */
+  --accent-primary: 51 65 85;
+  /* slate-700 */
+  --accent-hover: 30 41 59;
+  /* slate-800 */
+
+  /* Shadows */
+  --shadow-color: 71 85 105;
+  /* slate-600 */
+}
+
+/* Indigo Theme (Current) */
+[data-theme="indigo"] {
+  --color-primary: 99 102 241;
+  /* indigo-500 */
+  --color-primary-dark: 79 70 229;
+  /* indigo-600 */
+  --color-secondary: 168 85 247;
+  /* purple-500 */
+
+  --bg-gradient-start: 238 242 255;
+  /* indigo-50 */
+  --bg-gradient-mid: 250 245 255;
+  /* purple-50 */
+  --bg-gradient-end: 252 231 243;
+  /* pink-50 */
+
+  --text-primary: 17 24 39;
+  /* gray-900 */
+  --text-secondary: 75 85 99;
+  /* gray-600 */
+  --text-tertiary: 107 114 128;
+  /* gray-500 */
+
+  --surface-base: 255 255 255;
+  /* white */
+  --surface-elevated: 249 250 251;
+  /* gray-50 */
+
+  --border-color: 224 231 255;
+  /* indigo-100 */
+  --border-hover: 199 210 254;
+  /* indigo-200 */
+
+  --accent-primary: 99 102 241;
+  /* indigo-500 */
+  --accent-hover: 79 70 229;
+  /* indigo-600 */
+
+  --shadow-color: 99 102 241;
+  /* indigo-500 */
+}
+
+/* Ocean Theme */
+[data-theme="ocean"] {
+  --color-primary: 14 165 233;
+  /* sky-500 */
+  --color-primary-dark: 2 132 199;
+  /* sky-600 */
+  --color-secondary: 6 182 212;
+  /* cyan-500 */
+
+  --bg-gradient-start: 240 249 255;
+  /* sky-50 */
+  --bg-gradient-mid: 224 242 254;
+  /* sky-100 */
+  --bg-gradient-end: 207 250 254;
+  /* cyan-50 */
+
+  --text-primary: 12 74 110;
+  /* sky-900 */
+  --text-secondary: 3 105 161;
+  /* sky-700 */
+  --text-tertiary: 7 89 133;
+  /* sky-800 */
+
+  --surface-base: 255 255 255;
+  /* white */
+  --surface-elevated: 240 249 255;
+  /* sky-50 */
+
+  --border-color: 186 230 253;
+  /* sky-200 */
+  --border-hover: 125 211 252;
+  /* sky-300 */
+
+  --accent-primary: 14 165 233;
+  /* sky-500 */
+  --accent-hover: 2 132 199;
+  /* sky-600 */
+
+  --shadow-color: 14 165 233;
+  /* sky-500 */
+}
+
+/* Sunset Theme */
+[data-theme="sunset"] {
+  --color-primary: 251 146 60;
+  /* orange-400 */
+  --color-primary-dark: 249 115 22;
+  /* orange-500 */
+  --color-secondary: 251 113 133;
+  /* rose-400 */
+
+  --bg-gradient-start: 255 247 237;
+  /* orange-50 */
+  --bg-gradient-mid: 254 242 242;
+  /* red-50 */
+  --bg-gradient-end: 255 241 242;
+  /* rose-50 */
+
+  --text-primary: 124 45 18;
+  /* orange-900 */
+  --text-secondary: 194 65 12;
+  /* orange-700 */
+  --text-tertiary: 234 88 12;
+  /* orange-600 */
+
+  --surface-base: 255 255 255;
+  /* white */
+  --surface-elevated: 255 247 237;
+  /* orange-50 */
+
+  --border-color: 254 215 170;
+  /* orange-200 */
+  --border-hover: 253 186 116;
+  /* orange-300 */
+
+  --accent-primary: 249 115 22;
+  /* orange-500 */
+  --accent-hover: 234 88 12;
+  /* orange-600 */
+
+  --shadow-color: 251 146 60;
+  /* orange-400 */
+}
+
+/* Utility Classes Using Theme Variables */
+.bg-gradient-theme {
+  background: linear-gradient(to bottom right,
+      rgb(var(--bg-gradient-start)),
+      rgb(var(--bg-gradient-mid)),
+      rgb(var(--bg-gradient-end)));
+}
+
+.text-theme-primary {
+  color: rgb(var(--text-primary));
+}
+
+.text-theme-secondary {
+  color: rgb(var(--text-secondary));
+}
+
+.bg-surface {
+  background-color: rgb(var(--surface-base));
+}
+
+.bg-surface-elevated {
+  background-color: rgb(var(--surface-elevated));
+}
+
+.border-theme {
+  border-color: rgb(var(--border-color));
+}
+
+.border-theme-hover:hover {
+  border-color: rgb(var(--border-hover));
+}
+
+.bg-accent {
+  background-color: rgb(var(--accent-primary));
+}
+
+.bg-accent:hover {
+  background-color: rgb(var(--accent-hover));
+}
+
+/* Icon gradient - adapts to theme */
+.bg-icon-gradient {
+  background: linear-gradient(to bottom right,
+      rgb(var(--color-primary)),
+      rgb(var(--color-primary-dark)));
+}
+
+/* Button gradient - adapts to theme */
+.bg-button-gradient {
+  background: linear-gradient(to right,
+      rgb(var(--color-primary)),
+      rgb(var(--color-secondary)));
+}
+
+.bg-button-gradient:hover {
+  background: linear-gradient(to right,
+      rgb(var(--color-primary-dark)),
+      rgb(var(--accent-hover)));
+}
+
+/* Progress bar fill */
+.progress-bar-fill {
+  background: linear-gradient(to right,
+      rgb(var(--color-primary)),
+      rgb(var(--color-secondary)));
+}
+
+/* Theme-aware text colors */
+.text-accent {
+  color: rgb(var(--color-primary));
+}
+
+.text-accent-dark {
+  color: rgb(var(--color-primary-dark));
+}
+
+/* Theme-aware background colors */
+.bg-accent-light {
+  background-color: rgba(var(--color-primary), 0.1);
+}
+
+.bg-accent-lighter {
+  background-color: rgba(var(--color-primary), 0.05);
+}
+
+/* Theme-aware hover states */
+.hover\:bg-accent-light:hover {
+  background-color: rgba(var(--color-primary), 0.1);
+}
+
+.hover\:text-accent:hover {
+  color: rgb(var(--color-primary));
+}
+
+.hover\:text-accent-dark:hover {
+  color: rgb(var(--color-primary-dark));
+}
+
+.hover\:border-accent:hover {
+  border-color: rgb(var(--color-primary));
+}
+
+/* Theme-aware focus states */
+.focus\:ring-accent:focus {
+  --tw-ring-color: rgb(var(--color-primary));
+}
+
+.focus\:border-accent:focus {
+  border-color: rgb(var(--color-primary));
+}
+
+/* Theme-aware shadows */
+.shadow-theme {
+  box-shadow: 0 10px 15px -3px rgba(var(--shadow-color), 0.1),
+    0 4px 6px -2px rgba(var(--shadow-color), 0.05);
+}
+
+.shadow-theme-lg {
+  box-shadow: 0 20px 25px -5px rgba(var(--shadow-color), 0.1),
+    0 10px 10px -5px rgba(var(--shadow-color), 0.04);
+}
+
+/* Ring for active/selected items */
+.ring-accent {
+  --tw-ring-color: rgba(var(--color-primary), 0.5);
+}
+
+/* Border accent variations */
+.border-accent-light {
+  border-color: rgba(var(--color-primary), 0.2);
+}
+
+/* Completed/Success state - uses secondary theme color for harmony */
+.bg-completed-state {
+  background-color: rgb(var(--color-secondary));
+}
+
+.bg-completed-state:hover {
+  background-color: rgb(var(--color-primary));
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

@@ -57,8 +57,8 @@ class PRICalculator:
             i_raw = weights.get('I', 0)
             
             logger.info(
-                f"Q{idx} (ID:{question_id}): Option='{selected_option}' | "
-                f"Normalized[P={p_raw/100:.2f}, R={r_raw/100:.2f}, I={i_raw/100:.2f}]"
+                f"Q:{question_id}: Option='{selected_option}' | "
+                f"P={p_raw/100:.2f}, R={r_raw/100:.2f}, I={i_raw/100:.2f}]"
             )
         
         # Convert INTEGER weights (0-100) to FLOAT (0.0-1.0) and sum

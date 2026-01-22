@@ -182,7 +182,10 @@ def refresh_token(request: Request, refresh_token: str, db: Session = Depends(ge
         }
     except HTTPException:
         raise
-    except Exception:
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error refreshing token: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials"

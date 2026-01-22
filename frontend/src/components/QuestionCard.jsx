@@ -22,10 +22,10 @@ export default function QuestionCard({
   ].filter(Boolean);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-8 mb-6">
       {/* Question */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4 leading-relaxed">{questionText}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-800 mb-4 leading-relaxed">{questionText}</h2>
       </div>
 
       {/* Options */}
@@ -57,10 +57,10 @@ export default function QuestionCard({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-4 pt-8 border-t border-slate-100">
+      <div className="flex flex-col-reverse sm:flex-row gap-4 pt-8 border-t border-slate-100">
         <button
           onClick={onPrev}
-          className="flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-slate-800 font-medium transition"
+          className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-slate-500 hover:text-slate-800 font-medium transition w-full sm:w-auto border sm:border-none rounded-lg border-slate-200"
         >
           <ChevronLeft size={18} />
           Previous
@@ -71,7 +71,7 @@ export default function QuestionCard({
         <button
           onClick={onNext}
           disabled={!hasAnswered || (isLastQuestion && isSubmitting)}
-          className={`ml-auto flex items-center gap-2 px-8 py-3 font-medium rounded-lg transition shadow-sm hover:shadow-md ${!hasAnswered || (isLastQuestion && isSubmitting)
+          className={`sm:ml-auto w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 font-medium rounded-lg transition shadow-sm hover:shadow-md ${!hasAnswered || (isLastQuestion && isSubmitting)
             ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
             : isLastQuestion
               ? 'bg-slate-900 text-white hover:bg-slate-800'

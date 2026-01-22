@@ -5,7 +5,7 @@ from typing import List
 
 from core.database import get_db
 from models import User, TestMetadata, Question, Submission
-from schemas import TestMetadataResponse, QuestionResponse, QuestionsGroupedResponse
+from schemas import TestMetadataResponse, QuestionResponse, QuestionsResponse
 from core.security import get_current_user
 from core.cache import cache_get, cache_set
 import logging
@@ -56,20 +56,20 @@ def get_tests(
     return result
 
 
-@router.get("/{test_id}/questions", response_model=QuestionsGroupedResponse)
+@router.get("/{test_id}/questions", response_model=QuestionsResponse)
 def get_test_questions(
     test_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get all questions for a specific test, grouped by category
+    Get all questions for a specific test as a flat array
     
     Protected endpoint - requires authentication
     Cached for 1 hour
     """
-    # Try cache first
-    cache_key = f"tests:{test_id}:questions"
+    # Try cache first (v2 cache key for new response format)
+    cache_key = f"tests:{test_id}:questions:v2"
     cached_questions = cache_get(cache_key)
     if cached_questions:
         logger.debug(f"Returning cached questions for test {test_id}")
@@ -80,14 +80,12 @@ def get_test_questions(
     if not test:
         raise HTTPException(status_code=404, detail="Test not found")
     
-    # Fetch ALL questions for this test (PRI doesn't use categories)
+    # Fetch all questions for this test
     all_questions = db.query(Question).filter(Question.test_id == test_id).all()
     
-    # For compatibility with frontend expecting grouped response, return all in fundamentals
-    result = QuestionsGroupedResponse(
-        fundamentals=[QuestionResponse.model_validate(q) for q in all_questions],
-        applied=[],
-        industry=[]
+    # Return as flat array
+    result = QuestionsResponse(
+        questions=[QuestionResponse.model_validate(q) for q in all_questions]
     )
     
     # Cache for 1 hour

@@ -253,7 +253,10 @@ export const getDailyReflections = async () => {
     const response = await api.get('/journey/history');
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    // Don't throw error - this endpoint might not exist yet
+    // Just return empty array so the UI can continue
+    console.warn('Daily reflections endpoint not available:', error.response?.status);
+    return [];
   }
 };
 

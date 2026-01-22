@@ -59,21 +59,13 @@ export const useStore = create((set, get) => ({
   // ============================================================================
   // QUESTIONS (fetched from backend for specific test)
   // ============================================================================
-  questions: {
-    fundamentals: [],
-    applied: [],
-    industry: [],
-  },
+  questions: [],
   setQuestions: (questions) => set({ questions }),
 
-  // Get all questions as flat array with section info
+  // Get all questions (kept for compatibility, now just returns the array)
   getAllQuestions: () => {
     const { questions } = get();
-    return [
-      ...questions.fundamentals.map(q => ({ ...q, section: 'fundamentals' })),
-      ...questions.applied.map(q => ({ ...q, section: 'applied' })),
-      ...questions.industry.map(q => ({ ...q, section: 'industry' })),
-    ];
+    return questions;
   },
 
   // ============================================================================
@@ -83,15 +75,19 @@ export const useStore = create((set, get) => ({
   // Helper function to load test state from localStorage
   _loadTestState: (testId) => {
     try {
-      const savedStateStr = localStorage.getItem('testState');
+      const { user } = get();
+      if (!user?.id) return null;
+
+      // Use user-specific key key
+      const key = `testState_user_${user.id}_test_${testId}`;
+      const savedStateStr = localStorage.getItem(key);
       if (!savedStateStr) return null;
 
       const savedState = JSON.parse(savedStateStr);
 
-      // Validate test ID matches
+      // Validate test ID matches (redundant with key but safe)
       if (savedState.testId !== testId) {
-        console.log('Test ID mismatch - clearing old state');
-        localStorage.removeItem('testState');
+        localStorage.removeItem(key);
         return null;
       }
 
@@ -100,13 +96,13 @@ export const useStore = create((set, get) => ({
       const savedTime = savedState.timestamp || 0;
       const expirationTime = 24 * 60 * 60 * 1000; // 24 hours
 
+
+
       if (now - savedTime > expirationTime) {
-        console.log('Test state expired - clearing');
-        localStorage.removeItem('testState');
+        localStorage.removeItem(key);
         return null;
       }
 
-      console.log('Restored test state from localStorage');
       return savedState.state;
     } catch (error) {
       console.error('Failed to load test state:', error);
@@ -119,13 +115,17 @@ export const useStore = create((set, get) => ({
   _saveTestState: (testId, state) => {
     try {
       const { user } = get();
+      if (!user?.id) return;
+
       const toSave = {
         testId,
-        userId: user?.id,  // Associate with current user
+        userId: user.id,  // Associate with current user
         state,
         timestamp: Date.now()
       };
-      localStorage.setItem('testState', JSON.stringify(toSave));
+
+      const key = `testState_user_${user.id}_test_${testId}`;
+      localStorage.setItem(key, JSON.stringify(toSave));
     } catch (error) {
       console.error('Failed to save test state:', error);
       // Continue without persistence - non-critical error
@@ -133,7 +133,6 @@ export const useStore = create((set, get) => ({
   },
 
   testState: {
-    currentSection: 'fundamentals',
     currentQuestionIndex: 0,
     answers: {},
   },
@@ -149,23 +148,6 @@ export const useStore = create((set, get) => ({
     }
     return false; // No saved state
   },
-
-  setCurrentSection: (section) =>
-    set((state) => {
-      const newTestState = {
-        ...state.testState,
-        currentSection: section,
-        currentQuestionIndex: 0
-      };
-
-      // Persist to localStorage
-      const { currentTestId, _saveTestState } = get();
-      if (currentTestId) {
-        _saveTestState(currentTestId, newTestState);
-      }
-
-      return { testState: newTestState };
-    }),
 
   setCurrentQuestionIndex: (index) =>
     set((state) => {
@@ -200,12 +182,15 @@ export const useStore = create((set, get) => ({
     }),
 
   resetTestState: () => {
-    // Clear localStorage
-    localStorage.removeItem('testState');
+    // Clear localStorage for current user/test
+    const { user, currentTestId } = get();
+    if (user?.id && currentTestId) {
+      const key = `testState_user_${user.id}_test_${currentTestId}`;
+      localStorage.removeItem(key);
+    }
 
     set({
       testState: {
-        currentSection: 'fundamentals',
         currentQuestionIndex: 0,
         answers: {},
       },
@@ -214,10 +199,14 @@ export const useStore = create((set, get) => ({
 
   // Clear test state after submission
   clearTestState: () => {
-    localStorage.removeItem('testState');
+    const { user, currentTestId } = get();
+    if (user?.id && currentTestId) {
+      const key = `testState_user_${user.id}_test_${currentTestId}`;
+      localStorage.removeItem(key);
+    }
+
     set({
       testState: {
-        currentSection: 'fundamentals',
         currentQuestionIndex: 0,
         answers: {},
       },

@@ -9,6 +9,7 @@ import Onboarding from './components/Onboarding.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import AssessmentPortal from './components/AssessmentPortal.jsx';
 import ResultsPage from './components/ResultsPage.jsx';
+import DailyReflectionPage from './components/DailyReflectionPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 
@@ -59,6 +60,15 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ResultsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/reflection/:dayNumber"
+              element={
+                <ProtectedRoute>
+                  <DailyReflectionPage />
                 </ProtectedRoute>
               }
             />

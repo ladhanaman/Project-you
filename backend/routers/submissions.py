@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import update
+
 from typing import Dict, List
 import os
 import logging
@@ -205,52 +205,8 @@ def submit_assessment(
             )
         
         # Calculate scores with three-tier classification
-        scores = {
-            'fundamentals': 0,
-            'applied': 0,
-            'industry': 0,
-            'total': 0
-        }
-        
-        # Section-specific tag classification (per-category)
-        section_tags = {
-            'fundamentals': {'strong': set(), 'weak': set(), 'critical': set()},
-            'applied': {'strong': set(), 'weak': set(), 'critical': set()},
-            'industry': {'strong': set(), 'weak': set(), 'critical': set()}
-        }
-        
-        # Global tags for 4-week plan and projects
-        all_strong_tags = set()
-        all_weak_tags = set()
-        all_critical_tags = set()
-        
-        # Helper to get option index
-        def get_option_index(selected_answer: str, question: Question) -> int:
-            """Map selected answer to option index (1-5)"""
-            selected_answer = selected_answer.strip()
-            
-            if selected_answer == question.option_1.strip():
-                return 1
-            elif selected_answer == question.option_2.strip():
-                return 2
-            elif selected_answer == question.option_3.strip():
-                return 3
-            elif selected_answer == question.option_4.strip():
-                return 4
-            elif question.option_5 and selected_answer == question.option_5.strip():
-                return 5
-            
-            # Raise error instead of silent failure
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid answer '{selected_answer}' for question {question.id}"
-            )
-        
-        # PRI assessment doesn't use legacy category-based scoring
-        # All scoring is done by PRI calculator based on P/R/I weights
-        # Skip legacy weight calculation
-        
-        scores['total'] = scores['fundamentals'] + scores['applied'] + scores['industry']
+        # PRI assessment handling - logic simplified
+
         
         # Create submission record (PRI-only fields)
         db_submission = Submission(
@@ -315,76 +271,16 @@ def submit_assessment(
                 capture_exception(pri_error, context={"submission_id": db_submission.id})
         
 
-        # Prepare data for background task (with tags classification)
-        answers_data = []
-        for answer_submission in submission.answers:
-            question = question_map[answer_submission.question_id]
-            option_index = get_option_index(answer_submission.selected_answer, question)
-            # Legacy get_weight() removed - PRI uses get_pri_weights()
-            
-            answers_data.append({
-                'id': question.id,
-                'question_text': question.question_text,
-                'tags': question.tags,
-                'selected_answer': answer_submission.selected_answer,
-                'earned_weight': 0  # PRI uses different weight system
-            })
-        
-        # Section-specific tag classification for insights
-        tag_classification = {
-            # Per-section tags (for section-specific insights)
-            'fundamentals_tags': {
-                'strong': list(section_tags['fundamentals']['strong']),
-                'weak': list(section_tags['fundamentals']['weak']),
-                'critical': list(section_tags['fundamentals']['critical'])
-            },
-            'applied_tags': {
-                'strong': list(section_tags['applied']['strong']),
-                'weak': list(section_tags['applied']['weak']),
-                'critical': list(section_tags['applied']['critical'])
-            },
-            'industry_tags': {
-                'strong': list(section_tags['industry']['strong']),
-                'weak': list(section_tags['industry']['weak']),
-                'critical': list(section_tags['industry']['critical'])
-            },
-            # Global tags (for 4-week plan and projects)
-            'all_strong_tags': list(all_strong_tags),
-            'all_weak_tags': list(all_weak_tags),
-            'all_critical_tags': list(all_critical_tags)
-        }
-        
-        
-        # Trigger background task for insights and PDF for LEGACY assessments only
-        # PRI assessments handle their own generation synchronously above
-        if not is_pri_assessment:
-            try:
-                from tasks.report_tasks import generate_insights_and_report_task
-                background_tasks.add_task(
-                    generate_insights_and_report_task,
-                    db_submission.id,
-                    current_user.full_name,
-                    current_user.email,
-                    scores,
-                    answers_data,
-                    tag_classification  # Pass tag classification
-                )
-            except Exception as e:
-                logger.error(f"Failed to queue background task: {e}")
-                capture_exception(e, context={"submission_id": db_submission.id})
+        else:
+            # Fallback for non-PRI tests
+            logger.warning(f"Submission {db_submission.id} is NOT a PRI assessment. No logic available.")
+            db_submission.report_status = "completed"
+            db.commit()
 
-                # Update status to failed so user is not stuck in processing
-                try:
-                    db_submission.report_status = "failed"
-                    db.commit()
-                except Exception as db_err:
-                    logger.error(f"Failed to update submission status to failed: {db_err}")
-
-            # Continue even if task queueing fails
         
         logger.info(
             f"Assessment submitted: user_id={current_user.id} test_id={submission.test_id} "
-            f"(Score: {scores['total']}/300)"
+            f"(Submission ID: {db_submission.id})"
         )
         
         return ScoringResponse(
@@ -493,97 +389,5 @@ def get_user_submissions(
         raise HTTPException(status_code=500, detail="Failed to fetch submissions")
 
 
-@router.post("/{submission_id}/retry")
-@limiter.limit("3/hour")  # Reduced from 5/minute to prevent AI credit waste
-def retry_report_generation(
-    request: Request,
-    submission_id: int,
-    background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Retry AI report generation for submissions with pending_ai status.
-    
-    Called when user returns to view a report that failed initial AI generation.
-    Uses saved tag data from retry_metadata column for retry.
-    Uses atomic update to prevent race conditions.
-    """
-    try:
-        # Use atomic update to prevent race condition
-        # Only update if status is still pending_ai
-        stmt = (
-            update(Submission)
-            .where(Submission.id == submission_id)
-            .where(Submission.user_id == current_user.id)
-            .where(Submission.report_status == "pending_ai")
-            .values(report_status="processing")
-        )
-        result = db.execute(stmt)
-        db.commit()
-        
-        if result.rowcount == 0:
-            # Either submission not found, not owned by user, or already processing
-            submission = db.query(Submission).filter(
-                Submission.id == submission_id,
-                Submission.user_id == current_user.id
-            ).first()
-            
-            if not submission:
-                raise HTTPException(status_code=404, detail="Submission not found")
-            
-            return {"status": submission.report_status, "message": "Report already processed or processing"}
-        
-        # Get the submission to read retry data
-        submission = db.query(Submission).filter(
-            Submission.id == submission_id,
-            Submission.user_id == current_user.id
-        ).first()
-        
-        # Get saved retry data
-        retry_data = submission.retry_metadata if isinstance(submission.retry_metadata, dict) else {}
-        
-        if not retry_data:
-            logger.error(f"[Submission {submission_id}] No retry data found for pending_ai submission")
-            # Reset status back to pending_ai
-            submission.report_status = "pending_ai"
-            db.commit()
-            raise HTTPException(status_code=400, detail="Cannot retry - missing generation data")
-        
-        logger.info(f"[Submission {submission_id}] Retrying AI report generation")
-        
-        # Import and queue background task
-        from tasks.report_tasks import generate_insights_and_report_task
-        
-        # Reconstruct the tag classification from saved data
-        tag_classification = {
-            'fundamentals_tags': retry_data.get('fundamentals_tags', {}),
-            'applied_tags': retry_data.get('applied_tags', {}),
-            'industry_tags': retry_data.get('industry_tags', {}),
-            'all_strong_tags': retry_data.get('all_strong_tags', []),
-            'all_weak_tags': retry_data.get('all_weak_tags', []),
-            'all_critical_tags': retry_data.get('all_critical_tags', [])
-        }
-        
-        # Queue the report generation task
-        background_tasks.add_task(
-            generate_insights_and_report_task,
-            submission.id,
-            current_user.full_name,
-            current_user.email,
-            retry_data.get('scores', {}),
-            {},  # answers_data not needed for retry
-            tag_classification
-        )
-        
-        return {
-            "status": "processing",
-            "message": "Report generation started. Please refresh in a moment."
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error retrying report generation: {str(e)}")
-        capture_exception(e, context={"submission_id": submission_id, "user_id": current_user.id})
-        raise HTTPException(status_code=500, detail="Failed to retry report generation")
+# Legacy retry endpoint removed
+
