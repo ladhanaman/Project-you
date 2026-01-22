@@ -168,7 +168,11 @@ export default function DailyReflectionPage() {
         );
     }
 
-    const currentQuestionText = questions[currentStep];
+    // Handle both old string format and new object format
+    const currentQuestion = questions[currentStep];
+    const currentQuestionText = typeof currentQuestion === 'string'
+        ? currentQuestion
+        : currentQuestion?.question || 'Reflection question';
     const progress = ((currentStep + 1) / questions.length) * 100;
 
     return (
@@ -210,6 +214,23 @@ export default function DailyReflectionPage() {
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight mt-3">
                         {currentQuestionText}
                     </h2>
+                    {/* Timing Hint and Practical Suggestion */}
+                    {typeof currentQuestion === 'object' && (
+                        <div className="mt-4 space-y-2">
+                            {currentQuestion.timing_hint && (
+                                <div className="flex items-start gap-2 text-sm text-gray-600">
+                                    <span className="font-semibold text-accent">When:</span>
+                                    <span>{currentQuestion.timing_hint}</span>
+                                </div>
+                            )}
+                            {currentQuestion.hint && (
+                                <div className="flex items-start gap-2 text-sm text-gray-600 bg-accent-lighter/30 p-3 rounded-lg border border-accent-light">
+                                    <span className="font-semibold text-accent">Hint:</span>
+                                    <span>{currentQuestion.hint}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <textarea

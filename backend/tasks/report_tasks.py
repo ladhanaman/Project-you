@@ -10,11 +10,6 @@ from core.config import settings
 
 logger = logging.getLogger(__name__)
 
-
-
-
-
-
 def generate_pri_report_task(
     submission_id: int,
     candidate_name: str,
@@ -45,7 +40,8 @@ def generate_pri_report_task(
         
         # 1. Generate PRI Report
         try:
-            report_gen = PRIReportGenerator()
+            # You can change the model here (e.g., "gpt-4o", "gpt-4o-mini")
+            report_gen = PRIReportGenerator(model="gpt-5.2")
             report_md = report_gen.generate_report(
                 user_profile=user_settings,
                 pri_data=pri_data,
@@ -69,7 +65,7 @@ def generate_pri_report_task(
 
         # 2. Generate Reflection Session
         try:
-            reflection_gen = ReflectionSessionGenerator()
+            reflection_gen = ReflectionSessionGenerator(model="gpt-4o-mini")
             session_data = reflection_gen.generate_session(
                 user_profile=user_settings,
                 pri_data=pri_data,

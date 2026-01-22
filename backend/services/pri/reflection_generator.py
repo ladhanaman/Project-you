@@ -183,21 +183,138 @@ class ReflectionSessionGenerator:
         primary_dim: str,
         secondary_dim: str
     ) -> Dict:
-        """Generate a basic fallback session when AI fails."""
+        """Generate a basic fallback session with varied questions when AI fails."""
         
-        dimension_themes = {
-            "P": "finding meaning and direction",
-            "R": "building visibility and usefulness",
-            "I": "aligning authenticity with action"
+        # Question Banks per Dimension
+        question_bank = {
+            "P": [
+                # Set 1 (Day 1)
+                [
+                    {"question": "What activity today gave you the strongest sense of 'why'?", "timing_hint": "End of day", "hint": "Look for moments you felt connected to a bigger picture."},
+                    {"question": "Where did you feel your energy drain the fastest?", "timing_hint": "After work", "hint": "Low purpose often shows up as inexplicable fatigue."},
+                    {"question": "If you could skip one task tomorrow, what would it be?", "timing_hint": "Before sleep", "hint": "Identify what feels meaningless to you."}
+                ],
+                # Set 2 (Day 2)
+                [
+                    {"question": "Who did you help today, and how did it feel?", "timing_hint": "After interactions", "hint": "Contribution is a key driver of Purpose."},
+                    {"question": "What is one thing you did just because you 'had to'?", "timing_hint": "Mid-day check-in", "hint": "Notice where obligation replaces intention."},
+                    {"question": "What would you do tomorrow if no one was watching?", "timing_hint": "Morning planning", "hint": "Imagine acting purely from your own drive."}
+                ],
+                # Set 3 (Day 3)
+                [
+                    {"question": "When did you feel most 'in flow' today?", "timing_hint": "End of day", "hint": "Flow states often indicate alignment with purpose."},
+                    {"question": "What problem did you enjoy solving?", "timing_hint": "After a challenge", "hint": "Purpose often hides in the problems we like to fix."},
+                    {"question": "What is one small value you honored today?", "timing_hint": "Evening reflection", "hint": "Did you choose honesty? Quality? Kindness?"}
+                ],
+                 # Set 4 (Day 4)
+                [
+                    {"question": "What are you looking forward to tomorrow?", "timing_hint": "Before sleep", "hint": "Anticipation is a sign of purpose."},
+                    {"question": "What felt like a waste of time today?", "timing_hint": "After work", "hint": "Contrast this with what felt valuable."},
+                    {"question": "How did your work connect to a real person today?", "timing_hint": "End of day", "hint": "Purpose is often about impact on others."}
+                ]
+            ],
+            "R": [
+                # Set 1
+                [
+                    {"question": "When did you feel most 'seen' or understood today?", "timing_hint": "End of day", "hint": "Relevance is about connection and visibility."},
+                    {"question": "Where did you feel invisible or overlooked?", "timing_hint": "After a meeting", "hint": "Note the specific context or people involved."},
+                    {"question": "Who is one person you genuinely connected with?", "timing_hint": "Lunch or break", "hint": "It doesn't have to be a deep conversation."}
+                ],
+                # Set 2
+                [
+                    {"question": "What skill did you use that felt valuable?", "timing_hint": "After a task", "hint": "Competence builds clear Relevance."},
+                    {"question": "Did you ask for feedback today? If not, why?", "timing_hint": "End of work day", "hint": "Feedback loops are essential for high Relevance."},
+                    {"question": "Where could you have been more visible?", "timing_hint": "Morning planning", "hint": "Is there an idea you held back?"}
+                ],
+                # Set 3
+                [
+                    {"question": "Who relied on you today?", "timing_hint": "Evening reflection", "hint": "Being needed supports your sense of place."},
+                    {"question": "What community or group felt supportive?", "timing_hint": "After social time", "hint": "Or where did you feel like an outsider?"},
+                    {"question": "How did you express your unique perspective?", "timing_hint": "End of day", "hint": "Relevance requires showing up as yourself."}
+                ],
+                 # Set 4
+                [
+                    {"question": "What impact did you have on your team today?", "timing_hint": "End of day", "hint": "Even small contributions count."},
+                    {"question": "Did you hide any of your opinions today?", "timing_hint": "After a discussion", "hint": "Self-silencing lowers Relevance."},
+                    {"question": "Who could you support or mentor tomorrow?", "timing_hint": "Before sleep", "hint": "Building others' relevance builds your own."}
+                ]
+            ],
+            "I": [
+                 # Set 1
+                [
+                    {"question": "When did you feel like you were 'acting' a role?", "timing_hint": "Mid-day check", "hint": "Identity gaps feel like performance."},
+                    {"question": "What choice was 100% yours today?", "timing_hint": "End of day", "hint": "Autonomy helps rebuild Identity."},
+                    {"question": "What physical signal (tension, relief) did you ignore?", "timing_hint": "During stress", "hint": "The body often knows your truth before you do."}
+                ],
+                # Set 2
+                [
+                    {"question": "What boundary did you set or fail to set?", "timing_hint": "After a request", "hint": "Boundaries define where you begin and end."},
+                    {"question": "What did you say 'yes' to but meant 'no'?", "timing_hint": "End of day", "hint": "People-pleasing erodes Identity."},
+                    {"question": "What is one thing you did just for yourself?", "timing_hint": "Evening", "hint": "Not for work, not for family - for you."}
+                ],
+                # Set 3
+                [
+                    {"question": "When did you feel most authentic today?", "timing_hint": "End of day", "hint": "When were you not filtering yourself?"},
+                    {"question": "What drained you because it felt 'fake'?", "timing_hint": "After interactions", "hint": "Note who you were with."},
+                    {"question": "What personal standard did you uphold?", "timing_hint": "Morning reflection", "hint": "Identity is built on self-trust."}
+                ],
+                 # Set 4
+                [
+                    {"question": "Who makes you feel most like yourself?", "timing_hint": "After social time", "hint": "Spend more time with mirrors of your true self."},
+                    {"question": "What old story about yourself challenged you today?", "timing_hint": "During doubt", "hint": "Is it still true?"},
+                    {"question": "What do you need to forgive yourself for?", "timing_hint": "Before sleep", "hint": "Self-compassion strengthens Identity."}
+                ]
+            ]
         }
         
-        primary_theme = dimension_themes.get(primary_dim, "self-discovery")
-        secondary_theme = dimension_themes.get(secondary_dim, "growth")
+        integration_day = [
+            {"question": "Looking back, which dimension (P, R, I) improved most?", "timing_hint": "Weekly review", "hint": "Celebrate the small shift."},
+            {"question": "What is one micro-change you will keep doing?", "timing_hint": "Planning next week", "hint": "Sustainability matters more than intensity."},
+            {"question": "How do you see your Archetype differently now?", "timing_hint": "Final reflection", "hint": "You are not fixed; you are growing."}
+        ]
+
+        dimension_themes = {
+            "P": "finding meaning",
+            "R": "building connection",
+            "I": "trusting yourself"
+        }
         
-        name = user_profile.get("name", "User")
+        primary_theme_name = dimension_themes.get(primary_dim, "primary focus")
+        secondary_theme_name = dimension_themes.get(secondary_dim, "secondary focus")
+        
+        days_content = []
+        
+        for i in range(1, 8):
+            day_data = {"day": i, "content_id": f"REFLECT_D{i}", "unlock_day": i, "unlock_time_local": "09:00"}
+            
+            if i <= 4:
+                # Primary Theme
+                questions = question_bank.get(primary_dim, question_bank["P"])[i-1] # Use sets 0, 1, 2, 3
+                day_data["title"] = f"Day {i}: Focus on {primary_theme_name}"
+                day_data["questions"] = questions
+                day_data["micro_action"] = f"Take one small action for {primary_theme_name}"
+                day_data["notice_cue"] = f"Notice moments of {primary_theme_name}"
+                day_data["completion_check"] = "You paused to reflect"
+            elif i <= 6:
+                # Secondary Theme
+                questions = question_bank.get(secondary_dim, question_bank["R"])[i-5] # Use sets 0, 1
+                day_data["title"] = f"Day {i}: Focus on {secondary_theme_name}"
+                day_data["questions"] = questions
+                day_data["micro_action"] = f"Take one small action for {secondary_theme_name}"
+                day_data["notice_cue"] = f"Notice moments of {secondary_theme_name}"
+                day_data["completion_check"] = "You tried something new"
+            else:
+                # Integration Day 7
+                day_data["title"] = "Day 7: Integration"
+                day_data["questions"] = integration_day
+                day_data["micro_action"] = "Plan your next week"
+                day_data["notice_cue"] = "Notice how the three dimensions connect"
+                day_data["completion_check"] = "You completed the journey"
+                
+            days_content.append(day_data)
         
         return {
-            "reflection_session_title": f"7-Day Journey: {primary_theme.title()}",
+            "reflection_session_title": f"7-Day Journey: {primary_theme_name.title()}",
             "final_archetype": archetype_data["final_archetype"],
             "primary_theme": {
                 "dimension": primary_dim,
@@ -208,22 +325,5 @@ class ReflectionSessionGenerator:
                 "reason": f"Your {secondary_dim} score is second-lowest"
             },
             "unlock_default_time_local": "09:00",
-            "days": [
-                {
-                    "day": i,
-                    "content_id": f"REFLECT_D{i}",
-                    "title": f"Day {i}: {primary_theme if i <= 4 else secondary_theme if i <= 6 else 'Integration'}",
-                    "unlock_day": i,
-                    "unlock_time_local": "09:00",
-                    "questions": [
-                        f"What did you notice today about {primary_theme}?",
-                        f"How did this show up in your work?",
-                        "What one thing could you try differently?"
-                    ],
-                    "micro_action": f"Practice one small step toward {primary_theme}",
-                    "notice_cue": f"Pay attention to moments of {primary_theme}",
-                    "completion_check": "You'll feel a small shift in awareness"
-                }
-                for i in range(1, 8)
-            ]
+            "days": days_content
         }

@@ -112,7 +112,8 @@ class PRIReportGenerator:
             "final_archetype": archetype_data["final_archetype"],
             "display_archetype": archetype_data["display_archetype"],
             "positive_tags": ", ".join(signals.get("positive_tags", [])),
-            "negative_tags": ", ".join(signals.get("negative_tags", []))
+            "negative_tags": ", ".join(signals.get("negative_tags", [])),
+            "notable_flags": ", ".join(signals.get("notable_flags", [])) if signals.get("notable_flags") else "None"
         }
         
         errors = []
@@ -154,33 +155,48 @@ class PRIReportGenerator:
         name = user_profile.get("name", "User")
         archetype = archetype_data.get("final_archetype", "Explorer")
         
-        return f"""## 1. Your Archetype Overview
+        return f"""## 1. Your Archetype
 
 {name}, your pattern is **{archetype}**.
 
-## 2. Your PRI Pattern (What the Numbers Say)
+## 2. Your PRI Snapshot
 
-Your scores show:
 - Purpose: {pri_data['purpose_score']} ({pri_data['purpose_level']})
 - Relevance: {pri_data['relevance_score']} ({pri_data['relevance_level']})
 - Identity: {pri_data['identity_score']} ({pri_data['identity_level']})
 
-## 3. How You Currently Operate
+## 3. What Your Scores Mean (Science View)
 
-Your current operating mode reflects your PRI balance.
+Your scores reflect your current prioritization of meaning, connection, and self.
 
-## 4. What's Working
+## 4. Your Core Tension (The Main Story)
 
-You have strengths in your higher-scoring dimensions.
+The interaction between your highest and lowest scores creates your unique drive.
 
-## 5. What's Breaking
+## 5. Evidence From Your Signals
 
-Lower scores indicate areas needing attention.
+Your choices align with this pattern.
 
-## 6. Age-Stage Context
+## 6. How You Tend to Operate
 
-Your life stage shapes how this pattern shows up.
+You likely lead with your strongest dimension.
 
-## 7. Next: Reflection Session Unlocked
+## 7. What’s Going Well
+
+Leveraging your high scores brings flow.
+
+## 8. What’s Not Working
+
+Neglecting your low scores creates friction.
+
+## 9. Hidden Strength in Your Lowest Score
+
+There is untapped potential in your underused dimension.
+
+## 10. Shadow Risks of Your Highest Score(s)
+
+Watch out for overusing your strengths.
+
+## 11. Next Step Unlocked
 
 Your 7-day reflection journey is ready."""
