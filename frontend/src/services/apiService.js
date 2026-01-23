@@ -151,6 +151,27 @@ export const completeOnboarding = async (data) => {
   }
 };
 
+export const requestPasswordReset = async (email) => {
+  try {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+export const resetPassword = async (token, newPassword) => {
+  try {
+    const response = await api.post('/auth/reset-password', {
+      token,
+      new_password: newPassword
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
 // ============================================================================
 // TESTS
 // ============================================================================

@@ -18,13 +18,6 @@ cd "$(dirname "$0")"
 echo "2. Activating virtual environment..."
 source venv/bin/activate
 
-# Verify template exists
-if [ -f "templates/thinkbinary_report.html" ]; then
-    echo "✓ ThinkBinary template found"
-else
-    echo "✗ WARNING: ThinkBinary template not found!"
-fi
-
 # Start server
 echo "3. Starting server..."
 echo ""

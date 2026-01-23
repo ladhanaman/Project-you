@@ -162,11 +162,11 @@ OUTPUT:
 Return one JSON object ONLY (no markdown, no commentary, no extra text).
 Must match the exact schema asked by the user, with one modification:
 - Replace the "questions" array of strings with an array of objects:
-  {
+  {{
     "question": "...",
     "timing_hint": "...",
     "hint": "..."
-  }
+  }}
 
 Also keep these day-level fields:
 - micro_action
@@ -195,50 +195,50 @@ SIGNALS:
 OUTPUT REQUIREMENTS:
 Generate a JSON object with this exact structure:
 
-{{{{
+{{
   "reflection_session_title": "7-Day Journey: [Theme-based title]",
   "final_archetype": "{final_archetype}",
-  "primary_theme": {{{{
+  "primary_theme": {{
     "dimension": "{primary_dimension}",
     "reason": "Why this is the focus"
-  }}}},
-  "secondary_theme": {{{{
+  }},
+  "secondary_theme": {{
     "dimension": "{secondary_dimension}",
     "reason": "Why this matters secondarily"
-  }}}},
+  }},
   "unlock_default_time_local": "09:00",
   "days": [
-    {{{{
+    {{
       "day": 1,
       "content_id": "REFLECT_D1",
       "title": "Day title focused on primary theme",
       "unlock_day": 1,
       "unlock_time_local": "09:00",
       "questions": [
-        {{{{{{{{
+        {{
           "question": "Reflection question 1",
           "timing_hint": "When to do it (e.g., morning planning / after lunch / before sleep)",
           "hint": "A practical suggestion on how to answer or what to notice"
-        }}}}}}}},
-        {{{{{{{{
+        }},
+        {{
           "question": "Reflection question 2",
           "timing_hint": "When to do it",
           "hint": "A practical suggestion"
-        }}}}}}}},
-        {{{{{{{{
+        }},
+        {{
           "question": "Reflection question 3",
           "timing_hint": "When to do it",
           "hint": "A practical suggestion"
-        }}}}}}}}
+        }}
       ],
       "micro_action": "One small action to practice today (measurable, low-friction)",
       "notice_cue": "What to pay attention to today (signals, feelings, reactions, outcomes)",
       "completion_check": "How you'll know you did it (objective or specific evidence)"
-    }}}}
+    }}
 
     // ... days 2-7 with content_id REFLECT_D2 ... REFLECT_D7
   ]
-}}}}
+}}
 
 PLANNING CONSTRAINTS:
 - Each day must have exactly 3 question objects.

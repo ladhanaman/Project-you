@@ -5,6 +5,7 @@ import { useStore } from '../store/useStore.js';
 import { getSubmission, getReportDownloadUrl, retryReportGeneration, getReflectionSession } from '../services/apiService.js';
 import { Download, Loader, CheckCircle, AlertCircle, Award, Target, BookOpen, Briefcase, Home, TrendingUp, TrendingDown, RefreshCw, Clock, Map } from 'lucide-react';
 import MainLayout from './MainLayout.jsx';
+import { useWebSocket } from '../hooks/useWebSocket.js';
 
 // PRI Components
 import PRIScoreChart from './PRIScoreChart.jsx';
@@ -36,6 +37,43 @@ export default function ResultsPage() {
     // PRI specific state
     const [reflectionSession, setReflectionSession] = useState(null);
     const [activeTab, setActiveTab] = useState('report'); // 'report' or 'journey'
+
+    // WebSocket for real-time updates
+    const { status: wsStatus, connected: wsConnected } = useWebSocket(submissionId);
+
+    // Update submission details when WebSocket sends status update
+    // Update submission details when WebSocket sends status update
+    useEffect(() => {
+        if (!wsStatus) return;
+
+        console.log('[ResultsPage] WebSocket status update:', wsStatus);
+
+        setSubmissionDetails((prev) => {
+            // Safety check: if previous state is null or status matches, don't update
+            if (!prev || prev.report_status === wsStatus) {
+                return prev;
+            }
+            return {
+                ...prev,
+                report_status: wsStatus
+            };
+        });
+
+        // If status is terminal, stop polling and ensure we have latest data
+        if (wsStatus === 'completed' || wsStatus === 'failed' || wsStatus === 'pending_ai') {
+            setIsPolling(false);
+
+            // If completed, fetch fresh data to get the generated report content
+            if (wsStatus === 'completed') {
+                getSubmission(parseInt(submissionId))
+                    .then(details => {
+                        console.log('[ResultsPage] Fetched fresh details after WebSocket completion');
+                        setSubmissionDetails(details);
+                    })
+                    .catch(err => console.error("Failed to fetch final details", err));
+            }
+        }
+    }, [wsStatus, submissionId, setSubmissionDetails]);
 
     // Handle retry for pending_ai submissions
     const handleRetry = async () => {
@@ -79,9 +117,10 @@ export default function ResultsPage() {
 
     useEffect(() => {
         let isMounted = true;
-        let pollInterval = 3000; // Start at 3s (faster than old 5s)
-        const maxInterval = 30000; // Cap at 30s
-        const maxAttempts = 20; // Stop after ~100 seconds total
+        // Use slower polling when WebSocket is connected (as fallback)
+        let pollInterval = wsConnected ? 10000 : 5000; // 10s with WS, 5s without
+        const maxInterval = 30000;
+        const maxAttempts = wsConnected ? 10 : 20; // Fewer attempts with WebSocket
 
         // Separate polling for reflection session
         let sessionPollInterval = null;
@@ -93,12 +132,15 @@ export default function ResultsPage() {
 
             try {
                 const session = await getReflectionSession(parseInt(submissionId));
-                if (isMounted) {
+                if (isMounted && session) {
                     setReflectionSession(session);
                     return true; // Success
                 }
             } catch (e) {
-                console.log('Reflection session not ready yet, will retry...', e.message);
+                // Only log if it's a real error, not just 404/pending
+                if (e.response && e.response.status !== 404) {
+                    console.log('Reflection session check failed:', e.message);
+                }
                 return false; // Not ready yet
             }
             return false;
@@ -197,7 +239,7 @@ export default function ResultsPage() {
                     const blobUrl = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = blobUrl;
-                    a.download = `thinkbinary-report-${submissionId}.pdf`;
+                    a.download = `project-you-report-${submissionId}.pdf`;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(blobUrl);

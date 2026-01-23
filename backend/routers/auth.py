@@ -1,11 +1,11 @@
 # routers/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 
 from core.database import get_db
 from models import User
-from schemas import UserCreate, UserLogin, Token, UserResponse, OnboardingData
+from schemas import UserCreate, UserLogin, Token, UserResponse, OnboardingData, PasswordResetRequest, PasswordReset
 from core.security import (
     get_password_hash,
     authenticate_user,
@@ -17,6 +17,8 @@ from core.security import (
     REFRESH_TOKEN_EXPIRE_DAYS
 )
 import secrets
+import logging
+from datetime import datetime
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -236,4 +238,92 @@ def logout(
     return {
         "message": "Successfully logged out",
         "detail": "All tokens have been invalidated"
+    }
+
+
+@router.post("/forgot-password")
+@limiter.limit("3/hour")
+def request_password_reset(
+    request: Request,
+    data: PasswordResetRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Request a password reset link.
+    
+    Always returns success to prevent email enumeration.
+    Rate limited to 3 requests per hour per IP.
+    """
+    logger = logging.getLogger(__name__)
+    logger.info(f"Password reset requested for email: {data.email}")
+    
+    user = db.query(User).filter(User.email == data.email).first()
+    
+    # Always return success (security: prevent email enumeration)
+    if user:
+        # Generate reset token
+        reset_token = secrets.token_urlsafe(32)
+        user.password_reset_token = reset_token
+        user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        db.commit()
+        
+        # TODO: Send email with reset link
+        # send_password_reset_email(user.email, reset_token)
+        logger.info(f"Password reset token generated for {data.email}")
+        logger.info(f"Reset link: http://localhost:5173/reset-password/{reset_token}")
+    else:
+        logger.info(f"Password reset requested for non-existent email: {data.email}")
+    
+    return {
+        "message": "If an account with that email exists, a password reset link has been sent."
+    }
+
+
+@router.post("/reset-password")
+@limiter.limit("5/hour")
+def reset_password(
+    request: Request,
+    data: PasswordReset,
+    db: Session = Depends(get_db)
+):
+    """
+    Reset password using the token from email.
+    
+    Rate limited to 5 attempts per hour per IP.
+    """
+    logger = logging.getLogger(__name__)
+    
+    # Find user with this reset token
+    user = db.query(User).filter(
+        User.password_reset_token == data.token
+    ).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    # Check if token has expired
+    if not user.password_reset_expires or user.password_reset_expires < datetime.now(timezone.utc):
+        # Clear expired token
+        user.password_reset_token = None
+        user.password_reset_expires = None
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    # Update password
+    user.hashed_password = get_password_hash(data.new_password)
+    user.password_reset_token = None
+    user.password_reset_expires = None
+    user.token_version += 1  # Invalidate all existing sessions
+    db.commit()
+    
+    logger.info(f"Password successfully reset for user: {user.email}")
+    
+    return {
+        "message": "Password reset successful. Please log in with your new password."
     }

@@ -72,7 +72,7 @@ class ReflectionSessionGenerator:
                     max_retries=1
                 )
                 self.llms.append(gemini_llm)
-                logger.info("Initialized Gemini model")
+                logger.info("Initialized Gemini model (Fallback)")
             except Exception as e:
                 logger.warning(f"Failed to initialize Gemini: {e}")
 
@@ -113,24 +113,33 @@ class ReflectionSessionGenerator:
             }
             
             # Create chain with JSON parser
-            parser = JsonOutputParser()
+            output_parser = JsonOutputParser()
             
             errors = []
             
-            # Try each initialized model
+            # Try each initialized LLM
             for i, llm in enumerate(self.llms):
                 try:
-                    logger.info(f"Attempting session generation with model {i+1}/{len(self.llms)}...")
-                    chain = prompt | llm | parser
+                    # Determine which provider is being used
+                    model_name_str = ""
+                    if hasattr(llm, 'model_name'):
+                        model_name_str = f" ({llm.model_name})"
+                    elif hasattr(llm, 'model'):
+                        model_name_str = f" ({llm.model})"
                     
-                    # Invoke and parse
+                    provider = "OpenAI" if isinstance(llm, ChatOpenAI) else "Gemini"
+                    logger.info(f"Attempting session generation with {provider}{model_name_str}...")
+                    
+                    # Create chain with JSON output parser
+                    chain = prompt | llm | output_parser
                     session_data = chain.invoke(input_data)
                     
-                    logger.info(f"Successfully generated reflection session for {user_profile.get('name')}")
+                    logger.info(f"Successfully generated reflection session for {user_profile.get('name')} using {provider}{model_name_str}")
                     return session_data
                     
                 except Exception as e:
-                    logger.error(f"Model {i+1} failed: {str(e)}")
+                    provider = "OpenAI" if isinstance(llm, ChatOpenAI) else "Gemini"
+                    logger.error(f"{provider} reflection generation failed: {str(e)}")
                     errors.append(str(e))
                     continue
             

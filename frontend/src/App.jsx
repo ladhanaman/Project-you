@@ -5,6 +5,8 @@ import { useStore } from './store/useStore.js';
 
 import Login from './components/Login.jsx';
 import Signup from './components/Signup.jsx';
+import ForgotPassword from './components/ForgotPassword.jsx';
+import ResetPassword from './components/ResetPassword.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import AssessmentPortal from './components/AssessmentPortal.jsx';
@@ -27,6 +29,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             <Route
               path="/onboarding"

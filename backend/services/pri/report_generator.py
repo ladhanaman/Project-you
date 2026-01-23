@@ -28,7 +28,7 @@ class PRIReportGenerator:
         self,
         api_key: Optional[str] = None,
         gemini_api_key: Optional[str] = None,
-        model: str = "gpt-4o-mini",
+        model: str = "gpt-5.2",
         temperature: float = 0.3
     ):
         """
@@ -37,7 +37,7 @@ class PRIReportGenerator:
         Args:
             api_key: OpenAI API key
             gemini_api_key: Google Gemini API key
-            model: Model name (default: gpt-4o-mini)
+            model: Model name (default: gpt-5.2)
             temperature: Generation temperature (0.3 for balanced creativity)
         """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
@@ -71,7 +71,7 @@ class PRIReportGenerator:
                     max_retries=1
                 )
                 self.llms.append(gemini_llm)
-                logger.info("Initialized Gemini model")
+                logger.info("Initialized Gemini model (Fallback)")
             except Exception as e:
                 logger.warning(f"Failed to initialize Gemini: {e}")
 
@@ -121,10 +121,18 @@ class PRIReportGenerator:
         # Try each initialized LLM
         for i, llm in enumerate(self.llms):
             try:
+                # Determine which provider is being used
+                model_name = ""
+                if hasattr(llm, 'model_name'):
+                    model_name = f" ({llm.model_name})"
+                elif hasattr(llm, 'model'):
+                    model_name = f" ({llm.model})"
+                
+                provider = "OpenAI" if i == 0 and self.api_key else "Gemini"
+                logger.info(f"Attempting generation with {provider}{model_name}...")
+                
                 # Create chain and invoke
                 chain = prompt | llm
-                logger.info(f"Attempting generation with model {i+1}/{len(self.llms)}...")
-                
                 response = chain.invoke(input_data)
                 
                 # Extract content
@@ -133,11 +141,12 @@ class PRIReportGenerator:
                 else:
                     report_md = str(response)
                 
-                logger.info(f"Successfully generated PRI report for {user_profile.get('name')}")
+                logger.info(f"Successfully generated PRI report for {user_profile.get('name')} using {provider}{model_name}")
                 return report_md
                 
             except Exception as e:
-                logger.error(f"Model {i+1} failed: {str(e)}")
+                provider = "OpenAI" if i == 0 and self.api_key else "Gemini"
+                logger.error(f"{provider} generation failed: {str(e)}")
                 errors.append(str(e))
                 continue
         

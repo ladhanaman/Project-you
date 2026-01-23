@@ -34,6 +34,10 @@ class User(Base):
     education = Column(String(100), nullable=True)     # <--- NEW
     industry_domain = Column(String(100), nullable=True) # <--- NEW
     hobbies = Column(String(255), nullable=True)
+    
+    # Password Reset
+    password_reset_token = Column(String(255), nullable=True)
+    password_reset_expires = Column(DateTime, nullable=True)
 
     # Old onboarding fields removed - no longer needed
     
@@ -132,7 +136,7 @@ class Question(Base):
     test = relationship("TestMetadata", back_populates="questions")
 
     def __repr__(self):
-        return f"<Question id={self.id} category={self.category}>"
+        return f"<Question id={self.id} test_id={self.test_id}>"
 
     def get_all_options(self):
         """Return all options in order"""
