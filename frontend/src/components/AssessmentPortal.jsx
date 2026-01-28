@@ -60,38 +60,49 @@ export default function AssessmentPortal() {
     const loadQuestions = async () => {
       try {
         const testIdNum = parseInt(testId);
-        const data = await fetchQuestions(testIdNum);
-        setQuestions(data.questions);  // Extract questions array from response
         setCurrentTestId(testIdNum);
 
-        // Try to load saved test state
+        // Try to load saved test state first (which now includes questions)
         const wasRestored = loadTestState(testIdNum);
 
-        if (wasRestored) {
+        // Check if we have questions in the store (restored from cache)
+        const currentStore = useStore.getState();
+        if (wasRestored && currentStore.questions && currentStore.questions.length > 0) {
+          console.log('Restored questions and state from local storage - Skipping API fetch');
+
+          // Restore progress UI logic
+          const { answers } = currentStore.testState;
+
           // Find first unanswered question
           const findFirstUnanswered = () => {
-            const { answers } = useStore.getState().testState;
-
-            // Find first unanswered question in the flat array
-            for (let i = 0; i < data.questions.length; i++) {
-              if (!answers[data.questions[i].id]) {
+            for (let i = 0; i < currentStore.questions.length; i++) {
+              if (!answers[currentStore.questions[i].id]) {
                 return i;
               }
             }
-
-            // All answered - go to last question
-            return data.questions.length - 1;
+            return currentStore.questions.length - 1;
           };
 
-          const firstUnansweredIndex = findFirstUnanswered();
-          setCurrentQuestionIndex(firstUnansweredIndex);
-
+          setCurrentQuestionIndex(findFirstUnanswered());
           setRestoredProgress(true);
           timeoutId = setTimeout(() => setRestoredProgress(false), 2000);
-        } else {
-          // No saved state - start fresh
-          resetTestState();
+
+          setIsLoading(false);
+          return; // EXIT EARLY - DO NOT FETCH
         }
+
+        // If not found in cache, fetch from API
+        console.log('No cached questions found - Fetching from API');
+        const data = await fetchQuestions(testIdNum);
+        setQuestions(data.questions);  // Extract questions array from response
+
+        // After fetching, save to store immediately to persist for next time
+        // We trigger a dummy state save to persist the questions we just loaded
+        useStore.getState().setCurrentQuestionIndex(0);
+
+        // No saved state - start fresh
+        resetTestState();
+
       } catch (err) {
         setLoadError(err.message);
       } finally {

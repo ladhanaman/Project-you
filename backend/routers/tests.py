@@ -1,13 +1,13 @@
 # routers/tests.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List
 
 from core.database import get_db
 from models import User, TestMetadata, Question, Submission
 from schemas import TestMetadataResponse, QuestionResponse, QuestionsResponse
 from core.security import get_current_user
-from core.cache import cache_get, cache_set
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,21 +27,37 @@ def get_tests(
     Includes user's latest submission ID if they've completed the test
     """
     
-    # Fetch active tests
-    tests = db.query(TestMetadata).filter(TestMetadata.is_active == True).all()
+    # Subquery to count questions per test
+    question_counts = db.query(
+        Question.test_id,
+        func.count(Question.id).label('count')
+    ).group_by(Question.test_id).subquery()
     
-    result = []
-    for test in tests:
-        # Check if user has a submission for this test
-        latest_submission = db.query(Submission).filter(
-            Submission.user_id == current_user.id,
-            Submission.test_id == test.id
-        ).order_by(Submission.created_at.desc()).first()
-        
-        # Calculate total questions for this test
-        total_questions = db.query(Question).filter(Question.test_id == test.id).count()
-        
-        # Create response with submission ID if exists
+    # Subquery to get latest submission ID per test for current user
+    latest_submissions = db.query(
+        Submission.test_id,
+        func.max(Submission.id).label('submission_id')
+    ).filter(
+        Submission.user_id == current_user.id
+    ).group_by(Submission.test_id).subquery()
+    
+    # Main query
+    query = db.query(
+        TestMetadata,
+        func.coalesce(question_counts.c.count, 0).label('total_questions'),
+        latest_submissions.c.submission_id.label('user_submission_id')
+    ).outerjoin(
+        question_counts, TestMetadata.id == question_counts.c.test_id
+    ).outerjoin(
+        latest_submissions, TestMetadata.id == latest_submissions.c.test_id
+    ).filter(
+        TestMetadata.is_active.is_(True)
+    )
+    
+    results = query.all()
+    
+    response = []
+    for test, total_questions, submission_id in results:
         test_data = {
             'id': test.id,
             'title': test.title,
@@ -49,11 +65,11 @@ def get_tests(
             'duration_minutes': test.duration_minutes,
             'total_questions': total_questions,
             'created_at': test.created_at,
-            'user_submission_id': latest_submission.id if latest_submission else None
+            'user_submission_id': submission_id
         }
-        result.append(TestMetadataResponse(**test_data))
-    
-    return result
+        response.append(TestMetadataResponse(**test_data))
+        
+    return response
 
 
 @router.get("/{test_id}/questions", response_model=QuestionsResponse)
@@ -64,16 +80,7 @@ def get_test_questions(
 ):
     """
     Get all questions for a specific test as a flat array
-    
-    Protected endpoint - requires authentication
-    Cached for 1 hour
     """
-    # Try cache first (v2 cache key for new response format)
-    cache_key = f"tests:{test_id}:questions:v2"
-    cached_questions = cache_get(cache_key)
-    if cached_questions:
-        logger.debug(f"Returning cached questions for test {test_id}")
-        return cached_questions
     
     # Verify test exists
     test = db.query(TestMetadata).filter(TestMetadata.id == test_id).first()
@@ -87,8 +94,5 @@ def get_test_questions(
     result = QuestionsResponse(
         questions=[QuestionResponse.model_validate(q) for q in all_questions]
     )
-    
-    # Cache for 1 hour
-    cache_set(cache_key, result.model_dump(), ttl=3600)
     
     return result

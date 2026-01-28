@@ -17,8 +17,7 @@ class Settings(BaseSettings):
     # Security
     JWT_SECRET_KEY: str
     
-    # Redis Cache
-    REDIS_URL: str = "redis://localhost:6379/0"
+
     
     # AI Services (at least one required for production)
     OPENAI_API_KEY: Optional[str] = None
@@ -39,6 +38,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
     
     @property
     def cors_origins_list(self) -> List[str]:

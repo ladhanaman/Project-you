@@ -1,5 +1,5 @@
 # models.py
-from sqlalchemy import Column, Integer, String, Text, JSON, Boolean, ForeignKey, DateTime, Date, Float, Enum
+from sqlalchemy import Column, Integer, String, Text, JSON, Boolean, ForeignKey, DateTime, Date, Float, Enum, Index
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -225,6 +225,10 @@ class Submission(Base):
     
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        Index('idx_submission_user_test_created', 'user_id', 'test_id', 'created_at'),
+    )
 
     def __repr__(self):
         return f"<Submission id={self.id} user_id={self.user_id} test_id={self.test_id}>"

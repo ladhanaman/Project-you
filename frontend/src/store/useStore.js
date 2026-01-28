@@ -103,7 +103,7 @@ export const useStore = create((set, get) => ({
         return null;
       }
 
-      return savedState.state;
+      return savedState; // Return full object (contains .state and .questions)
     } catch (error) {
       console.error('Failed to load test state:', error);
       localStorage.removeItem('testState');
@@ -119,8 +119,9 @@ export const useStore = create((set, get) => ({
 
       const toSave = {
         testId,
-        userId: user.id,  // Associate with current user
+        userId: user.id,
         state,
+        questions: get().questions, // Save current questions with state
         timestamp: Date.now()
       };
 
@@ -128,7 +129,6 @@ export const useStore = create((set, get) => ({
       localStorage.setItem(key, JSON.stringify(toSave));
     } catch (error) {
       console.error('Failed to save test state:', error);
-      // Continue without persistence - non-critical error
     }
   },
 
@@ -140,10 +140,19 @@ export const useStore = create((set, get) => ({
   // Load test state for a specific test (call when test loads)
   loadTestState: (testId) => {
     const { _loadTestState } = get();
-    const savedState = _loadTestState(testId);
+    // _loadTestState now returns the full saved object (including questions), not just .state
+    // We need to modify _loadTestState to return the full object or handle it here.
+    // Let's modify _loadTestState to return the full object wrapper.
+    const savedData = _loadTestState(testId);
 
-    if (savedState) {
-      set({ testState: savedState });
+    if (savedData && savedData.state) {
+      set({ testState: savedData.state });
+
+      // If we have saved questions, restore them too
+      if (savedData.questions && savedData.questions.length > 0) {
+        set({ questions: savedData.questions });
+      }
+
       return true; // State was restored
     }
     return false; // No saved state
