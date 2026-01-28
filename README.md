@@ -1,129 +1,136 @@
 # Project You: Industry Readiness Assessment Platform
 
-A comprehensive platform designed to assess and improve industry readiness through multi-format tests, detailed reporting, and personalized journey tracking. The application consists of a **FastAPI** backend and a **React (Vite)** frontend.
+A comprehensive platform designed to assess and improve industry readiness through multi-format tests, detailed reporting, and personalized journey tracking. The application combines distinct behavioral psychology models (PRI) with technical assessments to provide a holistic view of a candidate's potential.
 
 ## 🚀 Features
 
-- **PRI Assessment Engine**: Advanced Purpose-Relevance-Identity scoring algorithm for deep behavioral analysis.
-- **Multi-Format Assessments**: Technical and behavioral tests with various question types.
-- **Detailed Reporting**: Generates PDF reports with insights (HTML templates) and AI-driven feedback.
-- **Personalized Journey**: Track progress and readiness scores over time.
-- **Security**: JWT-based authentication, HTTPS enforcement, and production-grade security practices.
-- **High-Performance**: Redis caching, optimized database queries (sub-20ms latency), and composite indexing.
-- **Monitoring**: Sentry integration for real-time error tracking.
+-   **PRI Assessment Engine**: Proprietary algorithm for calculating Purpose, Relevance, and Identity scores to determine user archetypes.
+-   **Multi-Format Assessments**: Support for technical quizzes and deep behavioral analysis.
+-   **AI-Driven Insights**: Automated generation of personalized reports and "Meet Yourself" reflection sessions using OpenAI/Gemini.
+-   **Dynamic Reporting**: PDF report generation with granular insights and visual scoring.
+-   **Personalized Journey**: A 7-day reflection journey unlocking daily based on user assessment results.
+-   **Security**: Production-ready auth (JWT), HTTPS enforcement, and secure headers.
+-   **High-Performance**: Sub-20ms API response times via optimized SQLAlchemy queries and composite indexing.
+
+## 🏗 System Architecture
+
+The project follows a modern client-server architecture:
+
+```mermaid
+graph TD
+    Client[React Frontend] -->|REST API| LB[Load Balancer/Nginx]
+    LB -->|HTTPS| API[FastAPI Backend]
+    
+    subgraph Backend Services
+        API --> Auth[Auth Service]
+        API --> Tests[Test Engine]
+        API --> Submissions[Submission Processor]
+        
+        Submissions -->|Async Task| Background[Background Workers]
+        Background -->|Generate| AI[AI Service (OpenAI/Gemini)]
+        Background -->|Calculate| PRI[PRI Engine]
+    end
+    
+    subgraph Data Layer
+        API --> DB[(PostgreSQL)]
+        API --> Redis[(Redis Cache)]
+    end
+```
+
+## 🔄 Data & User Flows
+
+### 1. Authentication Flow
+1.  **Signup/Login**: User credentials are validated.
+2.  **Token Generation**: valid `access_token` (JWT) is returned.
+3.  **Session**: Frontend attaches this token to `Authorization` header for all protected requests.
+
+### 2. Assessment Flow
+1.  **Selection**: User fetches available tests (`GET /tests`).
+2.  **Engagement**: User answers questions. Questions map to specific PRI dimensions via weighted options.
+    *   *Option 1-4*: Standard weights.
+    *   *Option 5*: Weighted for Purpose (P), Relevance (R), Identity (I).
+3.  **Submission**: User submits answers (`POST /submissions`).
+    *   Server validates question integrity.
+    *   **Synchronous**: Raw scores are calculated immediately.
+    *   **Asynchronous**: A background task is triggered for report generation.
+
+### 3. PRI Engine & Report Generation (Background)
+1.  **Normalization**: Raw weights are normalized against age and demographic factors.
+2.  **Classification**: The `ArchetypeClassifier` determines the user's "Final Archetype" (e.g., "Explorer", "Builder").
+3.  **AI Analysis**:
+    *   **Input**: User profile + Signals (Tags) + Scores.
+    *   **Processing**: LLM generates a cohesive narrative ("Your Core Story", "Hidden Strengths").
+4.  **Completion**: PDF is generated, and the submission status updates to `completed`.
 
 ## 🛠 Tech Stack
 
 ### Backend
-- **Framework**: FastAPI (Python 3.8+)
-- **Database**: PostgreSQL (SQLAlchemy ORM)
-- **Caching**: Redis
-- **Validation**: Pydantic
-- **Monitoring**: Sentry
-- **background Tasks**: Celery (Configured in `tasks/`)
+-   **Core**: Python 3.10+, FastAPI
+-   **Database**: PostgreSQL, SQLAlchemy (ORM)
+-   **Async Tasks**: Python `asyncio` + BackgroundTasks
+-   **AI**: OpenAI API / Google Gemini
+-   **Monitoring**: Sentry
+-   **Caching**: Redis (Rate Limiting)
 
 ### Frontend
-- **Framework**: React 19 (Vite)
-- **Language**: JavaScript/JSX
-- **Styling**: TailwindCSS v4
-- **State Management**: Zustand
-- **Icons**: Lucide React
-- **Networking**: Axios
-
-## 📋 Prerequisites
-
-- [Python 3.10+](https://www.python.org/downloads/)
-- [Node.js 16+](https://nodejs.org/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Redis](https://redis.io/) (Optional for dev, recommended for features relying on caching)
-
-## 🏁 Getting Started
-
-### 1. Backend Setup
-
-1.  **Navigate to the backend directory:**
-    ```bash
-    cd backend
-    ```
-
-2.  **Create and activate a virtual environment:**
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Environment Configuration:**
-    Copy the example environment file and configure your secrets:
-    ```bash
-    cp .env.example .env
-    ```
-    Update `.env` with your database credentials, API keys, and JWT secret.
-    *Note: `DATABASE_URL` is required.*
-
-5.  **Run the server:**
-    
-    You can use the provided restart script (handles cleanup and restart):
-    ```bash
-    ./restart_server.sh
-    ```
-    
-    Or run uvicorn directly:
-    ```bash
-    uvicorn main:app --reload --host 0.0.0.0 --port 8000
-    ```
-    
-    - API Documentation: `http://localhost:8000/docs`
-    - API Root: `http://localhost:8000`
-
-### 2. Frontend Setup
-
-1.  **Navigate to the frontend directory:**
-    ```bash
-    cd frontend
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-    
-    - Frontend URL: `http://localhost:5173`
+-   **Core**: React 19, Vite
+-   **Styling**: TailwindCSS v4
+-   **State**: Zustand
+-   **Network**: Axios
 
 ## 📂 Project Structure
 
-```
+```text
 project-you/
 ├── backend/
-│   ├── core/           # Config, Database, Security, Monitoring
-│   ├── routers/        # API Endpoints (Auth, Tests, Submissions, etc.)
-│   ├── services/       # Business Logic & External Integrations
-│   ├── models.py       # SQLAlchemy Database Models
-│   ├── schemas.py      # Pydantic Schemas
-│   ├── main.py         # Application Entry Point
-│   └── ...
-├── frontend/
-│   ├── src/            # React Source Code
-│   ├── public/         # Static Assets
-│   └── ...
-└── README.md
+│   ├── core/           # Config (Env), Security (JWT), Database
+│   ├── models.py       # SQLAlchemy Tables (Users, Submissions, Questions)
+│   ├── routers/        # API Endpoints
+│   │   ├── auth.py         # Login/Signup
+│   │   ├── tests.py        # Test Listing (Optimized)
+│   │   ├── submissions.py  # Scoring Logic
+│   │   └── journey.py      # Reflection Journey
+│   ├── services/       # Business Logic
+│   │   └── pri/            # PRI Calculation & AI Prompts
+│   └── templates/      # HTML Templates for PDF Reports
+└── frontend/           # React Application
 ```
 
-## 🔒 Environment Variables
+## 🏁 Getting Started
 
-Key variables in `.env`:
-- `DATABASE_URL`: Connection string for PostgreSQL.
-- `JWT_SECRET_KEY`: Secret for signing auth tokens.
-- `OPENAI_API_KEY` / `GEMINI_API_KEY`: API keys for AI features.
-- `ENVIRONMENT`: `development` or `production`.
+### Prerequisites
+-   Python 3.10+
+-   Node.js 16+
+-   PostgreSQL
 
-See `backend/.env.example` for the full list.
+### Backend Setup
+1.  Navigate to `backend`:
+    ```bash
+    cd backend
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    ```
+2.  Configure `.env` (Use `.env.example` as a template).
+3.  Run Server:
+    ```bash
+    uvicorn main:app --reload
+    ```
+    *API is available at `http://localhost:8000`*
+
+### Frontend Setup
+1.  Navigate to `frontend`:
+    ```bash
+    cd frontend
+    npm install
+    ```
+2.  Run Dev Server:
+    ```bash
+    npm run dev
+    ```
+    *App is available at `http://localhost:5173`*
+
+## 🔒 Security & Performance
+-   **Composite Indexing**: Optimized `(user_id, test_id, created_at)` index for instant submission lookups.
+-   **N+1 Query Elimination**: Test listing endpoint uses SQL joins to prevent thousands of unnecessary queries.
+-   **Rate Limiting**: `slowapi` protects auth and submission endpoints from abuse.
