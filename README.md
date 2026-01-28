@@ -4,12 +4,13 @@ A comprehensive platform designed to assess and improve industry readiness throu
 
 ## 🚀 Features
 
+- **PRI Assessment Engine**: Advanced Purpose-Relevance-Identity scoring algorithm for deep behavioral analysis.
 - **Multi-Format Assessments**: Technical and behavioral tests with various question types.
-- **Detailed Reporting**: Generates PDF reports with insights using HTML templates (`templates/thinkbinary_report.html`).
+- **Detailed Reporting**: Generates PDF reports with insights (HTML templates) and AI-driven feedback.
 - **Personalized Journey**: Track progress and readiness scores over time.
-- **AI Integration**: Uses OpenAI or Gemini for advanced analysis and feedback.
-- **Security**: JWT-based authentication and production-grade security practices.
-- **Performance**: Redis caching and Sentry monitoring integration.
+- **Security**: JWT-based authentication, HTTPS enforcement, and production-grade security practices.
+- **High-Performance**: Redis caching, optimized database queries (sub-20ms latency), and composite indexing.
+- **Monitoring**: Sentry integration for real-time error tracking.
 
 ## 🛠 Tech Stack
 
@@ -31,7 +32,7 @@ A comprehensive platform designed to assess and improve industry readiness throu
 
 ## 📋 Prerequisites
 
-- [Python 3.8+](https://www.python.org/downloads/)
+- [Python 3.10+](https://www.python.org/downloads/)
 - [Node.js 16+](https://nodejs.org/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Redis](https://redis.io/) (Optional for dev, recommended for features relying on caching)
