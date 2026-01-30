@@ -1,6 +1,11 @@
 # Project You: Industry Readiness Assessment Platform
 
-A comprehensive platform designed to assess and improve industry readiness through multi-format tests, detailed reporting, and personalized journey tracking. The application combines distinct behavioral psychology models (PRI) with technical assessments to provide a holistic view of a candidate's potential.
+**Project You** is an assessment and growth platform that combines technical quizzes with a proprietary behavioral psychology model (PRI).
+
+**What we are doing:**
+We ingest user responses from multi-format assessments to calculate "Purpose, Relevance, and Identity" scores. These scores drive two core outputs:
+1.  **AI-Generated Reports**: detailed PDF analyses of the user's professional archetype.
+2.  **The Journey**: A 7-day, day-by-day unlocked reflection program tailored to the user's specific results to improve their industry readiness.
 
 ## 🚀 Features
 
@@ -18,22 +23,21 @@ The project follows a modern client-server architecture:
 
 ```mermaid
 graph TD
-    Client[React Frontend] -->|REST API| LB[Load Balancer/Nginx]
-    LB -->|HTTPS| API[FastAPI Backend]
+    Client[React Frontend] -->|HTTP| API[FastAPI Backend]
     
-    subgraph Backend Services
-        API --> Auth[Auth Service]
+    subgraph Backend Logic
+        API --> Auth[Auth Component]
         API --> Tests[Test Engine]
         API --> Submissions[Submission Processor]
         
-        Submissions -->|Async Task| Background[Background Workers]
-        Background -->|Generate| AI[AI Service (OpenAI/Gemini)]
-        Background -->|Calculate| PRI[PRI Engine]
+        Submissions -.->|Process| PRI[PRI Scoring Engine]
+        PRI -->|Generate| Report[Report Generator]
+        Report -->|Call| AI[AI Service (OpenAI/Gemini)]
     end
     
-    subgraph Data Layer
+    subgraph Data Systems
         API --> DB[(PostgreSQL)]
-        API --> Redis[(Redis Cache)]
+        Report -->|Store| DB
     end
 ```
 
