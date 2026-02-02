@@ -11,7 +11,7 @@ import traceback
 
 from core.database import Base, engine
 from core.config import settings
-from routers import auth, tests, submissions, websocket, journey, pri
+from routers import auth, tests, submissions, websocket, journey, pri, dashboard
 from core.monitoring import init_sentry
 
 # Setup logging
@@ -82,7 +82,7 @@ async def add_cache_headers(request: Request, call_next):
         response.headers["Cache-Control"] = "private, max-age=3600"
     
     # API endpoints must not be cached (user-specific data)
-    elif request.url.path.startswith(("/submissions", "/auth", "/tests")):
+    elif request.url.path.startswith(("/submissions", "/auth", "/tests", "/dashboard")):
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
@@ -135,6 +135,7 @@ app.include_router(submissions.router)
 app.include_router(websocket.router)
 app.include_router(journey.router)
 app.include_router(pri.router)
+app.include_router(dashboard.router)
 
 # ============================================================================
 # ROOT ENDPOINTS

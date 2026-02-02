@@ -1,7 +1,7 @@
 // src/components/ForgotPassword.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import { requestPasswordReset } from '../services/apiService.js';
 
 export default function ForgotPassword() {
@@ -9,20 +9,35 @@ export default function ForgotPassword() {
     const [sent, setSent] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [errorType, setErrorType] = useState(''); // 'network' or 'server'
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setErrorType('');
         setLoading(true);
 
         try {
             await requestPasswordReset(email);
             setSent(true);
         } catch (err) {
-            setError(err.message || 'Failed to send reset link');
+            const errorMessage = err.message || 'Failed to send reset link';
+            setError(errorMessage);
+
+            // Categorize error type
+            if (errorMessage.includes('connect') || errorMessage.includes('network')) {
+                setErrorType('network');
+            } else {
+                setErrorType('server');
+            }
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleRetry = () => {
+        setError('');
+        setErrorType('');
     };
 
     if (sent) {
@@ -66,8 +81,22 @@ export default function ForgotPassword() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
-                            {error}
+                        <div className={`border px-4 py-3 rounded-xl flex items-start gap-2 ${errorType === 'network' ? 'bg-orange-50 border-orange-200 text-orange-700' :
+                                'bg-red-50 border-red-200 text-red-700'
+                            }`}>
+                            <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <span className="block">{error}</span>
+                                {errorType === 'network' && (
+                                    <button
+                                        type="button"
+                                        onClick={handleRetry}
+                                        className="mt-2 text-sm font-medium underline hover:no-underline"
+                                    >
+                                        Try again
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )}
 

@@ -151,6 +151,10 @@ export const completeOnboarding = async (data) => {
   }
 };
 
+export const updateUserProfile = async (data) => {
+  return completeOnboarding(data);
+};
+
 export const requestPasswordReset = async (email) => {
   try {
     const response = await api.post('/auth/forgot-password', { email });
@@ -281,6 +285,19 @@ export const getDailyReflections = async () => {
   }
 };
 
+// ============================================================================
+// DASHBOARD
+// ============================================================================
+
+export const getDashboardSummary = async () => {
+  try {
+    const response = await api.get('/dashboard/summary');
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
 export default {
   signup,
   login,
@@ -295,4 +312,7 @@ export default {
   getReflectionSession,
   submitDailyReflection,
   getDailyReflections,
+  getDailyReflections,
+  getDashboardSummary,
+  updateUserProfile,
 };

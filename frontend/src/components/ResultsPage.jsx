@@ -1,6 +1,6 @@
 // src/components/ResultsPage.jsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from '../store/useStore.js';
 import { getSubmission, getReportDownloadUrl, retryReportGeneration, getReflectionSession } from '../services/apiService.js';
 import { Download, Loader, CheckCircle, AlertCircle, Award, Target, BookOpen, Briefcase, Home, TrendingUp, TrendingDown, RefreshCw, Clock, Map } from 'lucide-react';
@@ -29,6 +29,7 @@ const ResultsSkeleton = () => (
 export default function ResultsPage() {
     const { submissionId } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { user, submissionDetails, setSubmissionDetails } = useStore();
     const [isPolling, setIsPolling] = useState(true);
     const [pollError, setPollError] = useState(null);
@@ -38,176 +39,68 @@ export default function ResultsPage() {
     const [reflectionSession, setReflectionSession] = useState(null);
     const [activeTab, setActiveTab] = useState('report'); // 'report' or 'journey'
 
-    // WebSocket for real-time updates
-    const { status: wsStatus, connected: wsConnected } = useWebSocket(submissionId);
-
-    // Update submission details when WebSocket sends status update
-    // Update submission details when WebSocket sends status update
+    // Handle tab from URL query parameter
     useEffect(() => {
-        if (!wsStatus) return;
-
-        console.log('[ResultsPage] WebSocket status update:', wsStatus);
-
-        setSubmissionDetails((prev) => {
-            // Safety check: if previous state is null or status matches, don't update
-            if (!prev || prev.report_status === wsStatus) {
-                return prev;
-            }
-            return {
-                ...prev,
-                report_status: wsStatus
-            };
-        });
-
-        // If status is terminal, stop polling and ensure we have latest data
-        if (wsStatus === 'completed' || wsStatus === 'failed' || wsStatus === 'pending_ai') {
-            setIsPolling(false);
-
-            // If completed, fetch fresh data to get the generated report content
-            if (wsStatus === 'completed') {
-                getSubmission(parseInt(submissionId))
-                    .then(details => {
-                        console.log('[ResultsPage] Fetched fresh details after WebSocket completion');
-                        setSubmissionDetails(details);
-                    })
-                    .catch(err => console.error("Failed to fetch final details", err));
-            }
+        const tabParam = searchParams.get('tab');
+        if (tabParam === 'journey') {
+            setActiveTab('journey');
         }
-    }, [wsStatus, submissionId, setSubmissionDetails]);
+    }, [searchParams]);
 
-    // Handle retry for pending_ai submissions
-    const handleRetry = async () => {
-        setIsRetrying(true);
-        setPollError(null);
-        try {
-            await retryReportGeneration(parseInt(submissionId));
-            // Start polling again after retry
-            setIsPolling(true);
-        } catch (err) {
-            setPollError(err.message);
-        } finally {
-            setIsRetrying(false);
-        }
-    };
-
-    const pollSubmission = useCallback(async () => {
-        if (!submissionId) return;
-
-        try {
-            const details = await getSubmission(parseInt(submissionId));
-            setSubmissionDetails(details);
-
-            if (details.report_status === 'completed' || details.report_status === 'failed' || details.report_status === 'pending_ai') {
-                setIsPolling(false);
-
-                // If completed and it's a PRI submission, fetch reflection session
-                if (details.report_status === 'completed' && (details.archetype || details.pri_report_md)) {
-                    try {
-                        const session = await getReflectionSession(parseInt(submissionId));
-                        setReflectionSession(session);
-                    } catch (e) {
-                        console.error("Failed to fetch reflection session", e);
-                    }
-                }
-            }
-        } catch (err) {
-            setPollError(err.message);
-        }
-    }, [submissionId, setSubmissionDetails]);
-
+    // Initial fetch to check status
     useEffect(() => {
         let isMounted = true;
-        // Use slower polling when WebSocket is connected (as fallback)
-        let pollInterval = wsConnected ? 10000 : 5000; // 10s with WS, 5s without
-        const maxInterval = 30000;
-        const maxAttempts = wsConnected ? 10 : 20; // Fewer attempts with WebSocket
-
-        // Separate polling for reflection session
         let sessionPollInterval = null;
         let sessionPollAttempts = 0;
-        const maxSessionAttempts = 6; // Poll for 30 seconds (5s * 6)
+        const maxSessionAttempts = 6; // Poll for 30 seconds
 
         const pollReflectionSession = async () => {
             if (!isMounted || !submissionId) return false;
-
             try {
                 const session = await getReflectionSession(parseInt(submissionId));
                 if (isMounted && session) {
                     setReflectionSession(session);
-                    return true; // Success
+                    return true;
                 }
             } catch (e) {
-                // Only log if it's a real error, not just 404/pending
-                if (e.response && e.response.status !== 404) {
-                    console.log('Reflection session check failed:', e.message);
-                }
-                return false; // Not ready yet
+                // Ignore 404s/errors during polling
             }
             return false;
         };
 
-        const startSessionPolling = () => {
-            // Try immediately first
-            pollReflectionSession().then(success => {
-                if (success || !isMounted) return;
+        if (submissionId) {
+            getSubmission(parseInt(submissionId))
+                .then(details => {
+                    if (!isMounted) return;
+                    setSubmissionDetails(details);
 
-                // If not successful, start polling
-                sessionPollInterval = setInterval(async () => {
-                    sessionPollAttempts++;
-
-                    const success = await pollReflectionSession();
-
-                    if (success || sessionPollAttempts >= maxSessionAttempts) {
-                        clearInterval(sessionPollInterval);
-                        if (!success) {
-                            console.warn('Reflection session polling stopped after max attempts');
-                        }
+                    // IF status is NOT completed or failed, redirect to generation page
+                    if (details.report_status === 'processing' || details.report_status === 'pending_ai') {
+                        navigate(`/report/generating/${submissionId}`, { replace: true });
+                        return; // Stop execution here
                     }
-                }, 5000); // Poll every 5 seconds
-            });
-        };
 
-        const poll = async () => {
-            if (!isMounted || !submissionId) return;
-
-            try {
-                const details = await getSubmission(parseInt(submissionId));
-                if (!isMounted) return;
-
-                setSubmissionDetails(details);
-
-                if (details.report_status === 'completed' || details.report_status === 'failed' || details.report_status === 'pending_ai') {
-                    setIsPolling(false);
-
-                    // If completed and it's a PRI submission, start polling for reflection session
+                    // If completed and it's a PRI submission, fetch reflection session
                     if (details.report_status === 'completed' && (details.archetype || details.pri_report_md)) {
-                        startSessionPolling();
+                        // Try to get it immediately
+                        pollReflectionSession().then(success => {
+                            if (!success && isMounted) {
+                                // If not found, start polling
+                                sessionPollInterval = setInterval(async () => {
+                                    sessionPollAttempts++;
+                                    const found = await pollReflectionSession();
+                                    if (found || sessionPollAttempts >= maxSessionAttempts) {
+                                        clearInterval(sessionPollInterval);
+                                    }
+                                }, 5000);
+                            }
+                        });
                     }
-                } else {
-                    // Increase interval (exponential backoff)
-                    pollInterval = Math.min(pollInterval * 1.2, maxInterval);
-
-                    // Schedule next poll only if still processing
-                    if (isPolling && isMounted) {
-                        setTimeout(poll, pollInterval);
-                    }
-                }
-            } catch (err) {
-                if (isMounted) {
-                    setPollError(err.message);
-                    // Backoff on error too
-                    pollInterval = Math.min(pollInterval * 1.5, maxInterval);
-
-                    // Retry with backoff
-                    if (isPolling && isMounted) {
-                        setTimeout(poll, pollInterval);
-                    }
-                }
-            }
-        };
-
-        // Start polling
-        poll();
+                })
+                .catch(err => {
+                    if (isMounted) setPollError(err.message);
+                });
+        }
 
         return () => {
             isMounted = false;
@@ -215,7 +108,7 @@ export default function ResultsPage() {
                 clearInterval(sessionPollInterval);
             }
         };
-    }, [isPolling, submissionId, setSubmissionDetails]);
+    }, [submissionId, navigate, setSubmissionDetails]);
 
     const handleDownloadPDF = () => {
         if (submissionId) {
@@ -510,6 +403,7 @@ function PRIReportView({ submissionDetails, reflectionSession, activeTab, setAct
             <ArchetypeCard
                 archetype={submissionDetails.archetype}
                 displayArchetype={submissionDetails.display_archetype}
+                variant="classic"
             />
 
             {/* Score Chart - Full Width */}

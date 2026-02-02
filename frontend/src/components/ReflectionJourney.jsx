@@ -35,7 +35,7 @@ const ReflectionJourney = ({ session }) => {
     };
 
     const handleDayClick = (dayNumber) => {
-        navigate(`/reflection/${dayNumber}`);
+        navigate(`/journey/day/${dayNumber}`);
     };
 
     if (!session || !session.days) {

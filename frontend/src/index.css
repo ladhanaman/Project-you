@@ -383,4 +383,35 @@
       background-position: -200% 0;
     }
   }
+
+  /* Staggered entrance animation */
+  @keyframes slide-up-fade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up-fade {
+    animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-xl;
+  }
+
+  .glass-panel-dark {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 shadow-xl text-white;
+  }
+
+  .glass-card-hover {
+    @apply transition-all duration-300 hover:bg-white/70 hover:shadow-2xl hover:-translate-y-1;
+  }
 }

@@ -9,11 +9,16 @@ import ForgotPassword from './components/ForgotPassword.jsx';
 import ResetPassword from './components/ResetPassword.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import BentoHome from './components/BentoHome.jsx';
 import AssessmentPortal from './components/AssessmentPortal.jsx';
 import ResultsPage from './components/ResultsPage.jsx';
+import UserProfile from './components/UserProfile.jsx';
+import GeneratingReportPage from './components/GeneratingReportPage.jsx';
 import DailyReflectionPage from './components/DailyReflectionPage.jsx';
+import JourneyOverviewPage from './components/JourneyOverviewPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
+import AppLayout from './components/AppLayout.jsx';
 
 export default function App() {
   const { initializeAuth } = useStore();
@@ -41,11 +46,25 @@ export default function App() {
               }
             />
 
+            {/* Home/Bento Dashboard */}
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <BentoHome />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <AppLayout>
+                    <Dashboard />
+                  </AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -54,7 +73,9 @@ export default function App() {
               path="/assessment/:testId"
               element={
                 <ProtectedRoute>
-                  <AssessmentPortal />
+                  <AppLayout>
+                    <AssessmentPortal />
+                  </AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -63,16 +84,53 @@ export default function App() {
               path="/results/:submissionId"
               element={
                 <ProtectedRoute>
-                  <ResultsPage />
+                  <AppLayout>
+                    <ResultsPage />
+                  </AppLayout>
                 </ProtectedRoute>
               }
             />
 
             <Route
-              path="/reflection/:dayNumber"
+              path="/report/generating/:submissionId"
               element={
                 <ProtectedRoute>
-                  <DailyReflectionPage />
+                  <AppLayout>
+                    <GeneratingReportPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <UserProfile />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/journey"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <JourneyOverviewPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/journey/day/:dayNumber"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <DailyReflectionPage />
+                  </AppLayout>
                 </ProtectedRoute>
               }
             />

@@ -137,25 +137,6 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gradient-theme relative">
             <div className="max-w-5xl mx-auto px-4 py-8">
-                {/* Header Section */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 sm:gap-0">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                            Welcome, {user?.full_name}
-                        </h1>
-                        <p className="text-gray-600">Your journey starts here</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <ThemeSwitcher />
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-white/80 rounded-lg transition border border-gray-200 backdrop-blur-sm"
-                        >
-                            <LogOut className="w-5 h-5" />
-                            Logout
-                        </button>
-                    </div>
-                </div>
 
                 {/* Main "Know Yourself" Card */}
                 {mainTest && (
